@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <title>ReInHerit Toolkit - Multimedia ChatBot</title>
+    <meta content="" name="descriptison">
+    <meta content="" name="keywords">
+
+    <!-- Favicons -->
+    <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+    <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Satisfy"
+          rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="{% static 'assets/libraries/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/libraries/icofont/icofont.min.css'%}" rel="stylesheet">
+    <link href="{% static 'assets/libraries/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/libraries/owl.carousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+
+    <!-- Template Main CSS File -->
+    <link href="{% static 'assets/css/vqa_style.css' %}" rel="stylesheet">
+</head>
+
+<body>
+<!-- ======= Header ======= -->
+<header id="header" class="fixed-top  d-flex align-items-center header-transparent"> <!-- justify-content-center -->
+    <img id="header_logo" href="/home" alt="reinherit logo"
+         src="https://www.reinherit.eu/wp-content/uploads/2022/07/reinherit-logo-square-300x300.jpg">
+    <div id="header_title">
+        <em>Re</em><strong>InHerit</strong>
+        <div id="undertitle">Redefining the Future of Cultural Heritage</div>
+    </div>
+    <nav class="nav-menu d-none d-lg-block">
+        <ul>
+            <li class="active menu_active"><a href="/home">Home</a></li>
+            <li class="menu_passive"><a href="/home/gallery">Gallery</a></li>
+        </ul>
+    </nav><!-- .nav-menu -->
+</header><!-- End Header -->
+
+<main id="main">
+    <!-- ======= Portfolio Details Section ======= -->
+        <div id="home_container">
+
+            <div class="section-title">
+                <h2>Welcome to Viola</h2>
+                <p>The first <strong>V</strong>isual <strong>I</strong>ntelligence <strong>O</strong>n<strong>L</strong>ine <strong>A</strong>rt-assistant AI for artwork's images which uses visual content and text description.</p>
+
+            </div>
+
+
+            <div>
+                <div class="owl-carousel portfolio-details-carousel">
+                    <a href="/home/gallery">
+                        <img src="{% static 'assets/img/portfolio/venere.jpeg' %}" class="img-fluid"
+                             alt="venere-preview">
+                    </a>
+                    <a href="/home/gallery">
+                        <img src="{% static 'assets/img/portfolio/herbe.jpg' %}" class="img-fluid"
+                             alt="dejeuner-sur-herbe-preview">
+                    </a>
+                    <a href="/home/gallery">
+                        <img src="{% static 'assets/img/portfolio/persistence.jpg' %}" class="img-fluid"
+                             alt="persistence-of-memory-preview">
+                    </a>
+
+                </div>
+
+                <div class="link-block">
+                    <h3><a class=link-button href="/home/gallery">Select a painting and ask a question</a></h3>
+                </div>
+            </div>
+        </div>
+<!--    </section>-->
+
+</main>
+<!-- End #main -->
+
+<!-- ======= Footer ======= -->
+<footer id="footer">
+    <div class="footer_container">
+        <h3><em>Re</em><strong>InHerit</strong> Toolkit - Multimedia ChatBot </h3>
+
+        <div class="social-links">
+            <a href="https://twitter.com/reinherit_" target="_blank" title="twitter" class="twitter"><i class="bx bxl-twitter"></i></a>
+            <a href="https://www.facebook.com/ReInHerit/" target="_blank" title="facebook" class="facebook"><i class="bx bxl-facebook"></i></a>
+            <a href="https://www.instagram.com/reinherit_/" target="_blank" title="instagram" class="instagram"><i class="bx bxl-instagram"></i></a>
+            <a href="https://www.linkedin.com/company/reinherit-h2020" target="_blank" title="linkedin" class="linkedin"><i class="bx bxl-linkedin"></i></a>
+            <a href="https://www.youtube.com/channel/UCWg6SySC2I-RQ41qjxZmTmA" target="_blank" title="youtube" class="youtube"><i class="bx bxl-youtube"></i></a>
+        </div>
+    </div>
+</footer>
+<!-- End Footer -->
+
+
+
+<!-- Libraries JS Files -->
+<script src="{% static 'assets/libraries/jquery/jquery.min.js'%}"></script>
+<script src="{% static 'assets/libraries/bootstrap/js/bootstrap.bundle.min.js'%}"></script>
+<script src="{% static 'assets/libraries/jquery.easing/jquery.easing.min.js'%}"></script>
+<script src="{% static 'assets/libraries/owl.carousel/owl.carousel.min.js'%}"></script>
+<script src="{% static 'assets/libraries/isotope-layout/isotope.pkgd.min.js'%}"></script>
+
+
+<!-- Main JS File -->
+<script src="{% static 'assets/js/main.js' %}"></script>
+
+
+</body>
+
+</html>

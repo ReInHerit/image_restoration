@@ -2,3 +2,18 @@ __pycache__/
 *.pyc
 *~
 
+/Face_Enhancement/checkpoints/
+/Global/detection_models/sync_batchnorm/
+/Global/detection_models/Synchronized-BatchNorm-PyTorch/
+/Global/detection_models/tests/
+/Global/detection_models/.gitignore
+/Global/detection_models/LICENSE
+/Global/detection_models/README.md
+/Face_Enhancement/models/networks/README.md
+/Face_Enhancement/models/networks/LICENSE
+/Face_Enhancement/models/networks/.gitignore
+/Face_Enhancement/models/networks/tests/
+/Face_Enhancement/models/networks/Synchronized-BatchNorm-PyTorch/
+/Face_Enhancement/models/networks/sync_batchnorm/
+/Face_Detection/shape_predictor_68_face_landmarks.dat
+/Global/checkpoints/
