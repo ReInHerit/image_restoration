@@ -10,66 +10,63 @@ from subprocess import call
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS, cross_origin
 from PIL import Image
+import torch
+
+print(f"Is CUDA supported by this system? {torch.cuda.is_available()}")
+print(f"CUDA version: {torch.version.cuda}")
+
+# Storing ID of current CUDA device
+cuda_id = torch.cuda.current_device()
+print(f"ID of current CUDA device:{torch.cuda.current_device()}")
+
+print(f"Name of current CUDA device:{torch.cuda.get_device_name(cuda_id)}")
 app = Flask(__name__)
 CORS(app)
 input_folder = './media/input_images'
+input_scratched = './media/input_scratched_images'
+input_hd = './media/input_hd_images'
 media_folder = './media'
 output_folder = './media/output_images'
 
 @app.route('/upload-image', methods=['POST'])
 @cross_origin()
 def upload_image():
-    if os.path.exists(media_folder):
-        shutil.rmtree(media_folder)
-    os.makedirs(media_folder)
-    if os.path.exists(input_folder):
-        shutil.rmtree(input_folder)
-    os.makedirs(input_folder)
-    if os.path.exists(output_folder):
-        shutil.rmtree(output_folder)
-    os.makedirs(output_folder)
+    folders = [media_folder, input_folder, input_scratched, input_hd, output_folder]
+    processed_images = []
+    for folder in folders:
+        delete_and_make_folder(folder)
 
     files = request.files.getlist('image')
+    scratched = request.values.getlist('scratched')
+    hd_files = request.values.getlist('hd')
+
     if not files:
         return jsonify({'error': 'No images found'})
-    processed_images = []
-    for image in files:
+
+    for i in range(len(files)):
+        image = files[i]
         if image.content_type not in ['image/jpeg', 'image/png']:
             return jsonify({'error': 'Invalid image format'})
-        img = Image.open(image)  # .imdecode(np.frombuffer(image.read(), np.uint8), cv2.IMREAD_COLOR)
-        # Perform image processing here
-        # Save input image
-        input_filename = os.path.join(input_folder, image.filename)
-
-        print(image.filename.split('.')[0], image.filename.split('.')[1])
-        # Example image processing: resize to 300x300
+        img = Image.open(image)
+        if scratched[i] == 'true' and hd_files[i] == 'true':
+            input_filename = os.path.join(input_hd, image.filename)
+        elif scratched[i] == 'true' and hd_files[i] == 'false':
+            input_filename = os.path.join(input_scratched, image.filename)
+        else:
+            input_filename = os.path.join(input_folder, image.filename)
         img.save(input_filename)
-        # img.save(input_f)
-        # Save processed image
-        output_filename = os.path.join(output_folder, 'final_output', image.filename)
-        # cv2.imwrite(output_filename, img)
-        processed_images.append(output_filename)
-    modify()
 
-    for file in os.listdir(input_folder):
-        print(file)
-        name, ext = file.split('.')
-        input_src = os.path.join(input_folder, file)
-        output_src = os.path.join(output_folder, 'final_output', file)
-        input_f = os.path.join(media_folder, name + '_input.' + ext)
-        output_f = os.path.join(media_folder, name + '_output.' + ext)
-        paragon_f = os.path.join(media_folder, name + '_paragon.' + ext)
-        shutil.copy(input_src, input_f)
-        shutil.copy(output_src, output_f)
-        differences(input_f, output_f,  paragon_f)
+    modify()
+    for file in os.listdir(output_folder+'/stage_1_restore_output/input_image'):
+        processed_images.append(file)
+    differences(input_folder)
+    differences(input_scratched)
+    differences(input_hd)
 
     return jsonify({'images': processed_images})
 
 
-
-print('ce so')
-def modify(image_filename=None, cv2_frame=None):
-
+def modify(image_filename=None, cv2_frame=None, scratched = None):
     def run_cmd(command):
         try:
             call(command, shell=True)
@@ -79,6 +76,8 @@ def modify(image_filename=None, cv2_frame=None):
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_folder", type=str, default=input_folder, help="Test images")
+    parser.add_argument("--input_scratched", type=str, default=input_scratched, help="Test images")
+    parser.add_argument("--input_hd", type=str, default=input_hd, help="Test images")
     parser.add_argument("--output_folder", type=str, default=output_folder,
                         help="Restored images, please use the absolute path")
     parser.add_argument("--GPU", type=str, default="-1", help="0,1,2")
@@ -91,11 +90,11 @@ def modify(image_filename=None, cv2_frame=None):
 
     # resolve relative paths before changing directory
     opts.input_folder = os.path.abspath(opts.input_folder)
+    opts.input_scratched = os.path.abspath(opts.input_scratched)
+    opts.input_hd = os.path.abspath(opts.input_hd)
     opts.output_folder = os.path.abspath(opts.output_folder)
     if not os.path.exists(opts.output_folder):
         os.makedirs(opts.output_folder)
-    print("Input folder: ", opts.input_folder)
-    print("Output folder: ", opts.output_folder)
     main_environment = os.getcwd()
 
     # Stage 1: Overall Quality Improve
@@ -103,11 +102,32 @@ def modify(image_filename=None, cv2_frame=None):
     print("current directory: ", os.getcwd())
     os.chdir(os.path.join(main_environment, "Global"))
     stage_1_input_dir = opts.input_folder
+    stage_1_scratched_dir = opts.input_scratched
+    stage_1_hd_dir = opts.input_hd
     stage_1_output_dir = os.path.join(opts.output_folder, "stage_1_restore_output")
     if not os.path.exists(stage_1_output_dir):
         os.makedirs(stage_1_output_dir)
-
-    if not opts.with_scratch:
+    if not len(os.listdir(stage_1_scratched_dir)) == 0:
+        mask_dir = os.path.join(stage_1_output_dir, "masks")
+        new_input = os.path.join(mask_dir, "input")
+        new_mask = os.path.join(mask_dir, "mask")
+        stage_1_command_1 = ("python detection.py --test_path " + stage_1_scratched_dir + " --output_dir " + mask_dir
+                             + " --input_size full_size" + " --GPU " + gpu1)
+        stage_1_command_2 = ("python test.py --Scratch_and_Quality_restore --test_input " + new_input + " --test_mask "
+                             + new_mask + " --outputs_dir " + stage_1_output_dir + " --gpu_ids " + gpu1)
+        run_cmd(stage_1_command_1)
+        run_cmd(stage_1_command_2)
+    if not len(os.listdir(stage_1_hd_dir)) == 0:
+        mask_dir = os.path.join(stage_1_output_dir, "masks_hd")
+        new_input = os.path.join(mask_dir, "input")
+        new_mask = os.path.join(mask_dir, "mask")
+        stage_1_command_1 = ("python detection.py --test_path " + stage_1_hd_dir + " --output_dir " + mask_dir
+                             + " --input_size full_size" + " --GPU " + gpu1)
+        stage_1_command_2 = ("python test.py --Scratch_and_Quality_restore --test_input " + new_input + " --test_mask "
+                             + new_mask + " --outputs_dir " + stage_1_output_dir + " --gpu_ids " + gpu1 + " --HR")
+        run_cmd(stage_1_command_1)
+        run_cmd(stage_1_command_2)
+    if not len(os.listdir(stage_1_input_dir)) == 0:
         stage_1_command = (
             "python test.py --test_mode Full --Quality_restore --test_input "
             + stage_1_input_dir
@@ -117,16 +137,6 @@ def modify(image_filename=None, cv2_frame=None):
             + gpu1
         )
         run_cmd(stage_1_command)
-    else:
-        mask_dir = os.path.join(stage_1_output_dir, "masks")
-        new_input = os.path.join(mask_dir, "input")
-        new_mask = os.path.join(mask_dir, "mask")
-        stage_1_command_1 = ("python detection.py --test_path " + stage_1_input_dir + " --output_dir " + mask_dir
-            + " --input_size full_size" + " --GPU " + gpu1)
-        stage_1_command_2 = ("python test.py --Scratch_and_Quality_restore --test_input " + new_input + " --test_mask "
-            + new_mask + " --outputs_dir " + stage_1_output_dir + " --gpu_ids " + gpu1 )
-        run_cmd(stage_1_command_1)
-        run_cmd(stage_1_command_2)
 
     # Solve the case when there is no face in the old photo
     stage_1_results = os.path.join(stage_1_output_dir, "restored_image")
@@ -188,29 +198,56 @@ def modify(image_filename=None, cv2_frame=None):
     print("All the processing is done. Please check the results.")
     os.chdir(".././")
 
-def differences(input_image_path, output_image_path, paragon_path):
-    input_image = Image.open(input_image_path)
-    output_image = Image.open(output_image_path)
-    size_input = input_image.size
-    size_output = output_image.size
-    if size_input != size_output:
-        output_image = output_image.resize(size_input)
-        output_image.save(output_image_path)
 
-    # convert to numpy arrays and subtract
-    input_array = np.array(input_image)
-    output_array = np.array(output_image)
-    input_gray = np.dot(input_array[..., :3], [0.2989, 0.5870, 0.1140])
-    output_gray = np.dot(output_array[..., :3], [0.2989, 0.5870, 0.1140])
+def delete_and_make_folder(folder):
+    if os.path.exists(folder):
+        shutil.rmtree(folder)
+    os.makedirs(folder)
 
-    result = (input_gray - output_gray)
 
-    # set negative values to zero
-    result[result < 0] = 0
+def differences(folder):
+    check_folder = output_folder + '/stage_1_restore_output/input_image'
+    check_files = os.listdir(check_folder)
+    for file in os.listdir(folder):
+        print(file)
+        name, ext = file.split('.')
+        for filename in check_files:
+            # check if the filename (without extension) matches the one we're looking for
+            if os.path.splitext(filename)[0] == name:
+                # if it does, get the extension using os.path.splitext and print it
+                ext = os.path.splitext(filename)[1]
+                print(f"Found file '{filename}' with extension '{ext}'")
 
-    # convert back to PIL image and save
-    result_image = Image.fromarray(result.astype('uint8'))
-    result_image.save(paragon_path)
+        input_src = os.path.join(folder, file)
+        output_src = os.path.join(output_folder, 'final_output', name + ext)
+        input_f = os.path.join(media_folder, name + '_input' + ext)
+        output_f = os.path.join(media_folder, name + '_output' + ext)
+        paragon_f = os.path.join(media_folder, name + '_paragon' + ext)
+        shutil.copy(input_src, input_f)
+        shutil.copy(output_src, output_f)
+        input_image = Image.open(input_f)
+        output_image = Image.open(output_f)
+        size_input = input_image.size
+        size_output = output_image.size
+        if size_input != size_output:
+            output_image = output_image.resize(size_input)
+            output_image.save(output_f)
+
+        # convert to numpy arrays and subtract
+        input_array = np.array(input_image)
+        output_array = np.array(output_image)
+        input_gray = np.dot(input_array[..., :3], [0.2989, 0.5870, 0.1140])
+        output_gray = np.dot(output_array[..., :3], [0.2989, 0.5870, 0.1140])
+
+        result = (input_gray - output_gray)
+
+        # set negative values to zero
+        result[result < 0] = 0
+
+        # convert back to PIL image and save
+        result_image = Image.fromarray(result.astype('uint8'))
+        result_image.save(paragon_f)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

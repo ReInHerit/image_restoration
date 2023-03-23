@@ -1,8 +1,11 @@
 let selected_images = [];
-
+let scratched_images = [];
+let hd_images = [];
 $(document).ready(function () {
     const landing_section = "<div id=\"landing\">\n" +
-        "            <p>This is the landing page for this webapp that does a lot of wonderful things</p>\n" +
+        "            <h1>Welcome to ReInHerit's Old Photos' Restorer!</h1> <p>Our virtual toolkit is designed to help museum owners and enthusiasts restore old photos with ease. " +
+    "       <p>Simply upload your photo, with or without scratches, and watch as our advanced processing algorithms work their magic. Once the image processing is complete, you'll have a fully restored photo to cherish and share with future generations. <br>" +
+        "Try it out today and rediscover the beauty of your old photographs.</p>\n" +
         "            <img id=\"cover_image\" alt=\"landing image\" src=\"static/assets/images/scratch_detection.png\">\n" +
         "            <a id=\"start_button\"  class=\"square_btn\">START TO RESTORE</a>\n" +
         "        </div>"
@@ -18,13 +21,13 @@ $(document).ready(function () {
         "  <form id=\"image-form\">\n" +
         "      <a class=\"square_btn\" type=\"button\" onclick=\"document.getElementById('image-input').click(); return false;\"> BROWSE </a>\n" +
         "      <input type=\"file\" id=\"image-input\" name=\"image\" class='hidden_tag' accept=\"image/*\" multiple>\n" +
-        "      <br>\n" +
         "      <div id=\"selected-images\" ></div>\n" +
         "      <br>\n" +
         "      <a id='submit_label' class=\"square_btn\" type=\"button\" onclick=\"document.getElementById('submit-button').click(); return false;\"> PROCESS </a>\n" +
         "      <button id='submit-button' type=\"submit\" class='hidden_tag'></button>\n" +
+        "      <br>\n" +
         "  </form>\n" +
-        "       <div id='enlarged' class='hidden_tag'> </div>\n" +
+        "  <div id='enlarged' class='hidden_tag'> </div>\n" +
         "  </div>"
 
     // const loading_div = "<div id=\"loading-container\"><p>PROCESSING IMAGES</p></div>"
@@ -35,19 +38,21 @@ $(document).ready(function () {
 
     const output_section = "<div id=\"output-section\">\n" +
         "  <div id='output-description'>\n" +
-        "       <h1>Output Section</h1>\n" +
-        "       <div class='vertical'><p>Here you can see the results of the processing:" +
+        "       <h1>OUTPUT</h1>\n" +
+        "       <div class='vertical'><p>Here you can see the results of the processing:</p>" +
         "           <ul style=\"list-style-type:disc;\">\n" +
         "               <li>The first image is the original image</li>\n" +
         "               <li>The second is an image of comparison on the areas most affected by the process.</li>\n" +
         "               <li>The third image is the output image</li>\n" +
         "           </ul>\n" +
-        "       </p></div>\n" +
+        "       <p>Clicking on DOWNLOAD button the outputs will be stored on your PC.</p></div>\n" +
         "  </div>\n" +
         "  <div id=\"output-images\">\n" +
         "  </div>\n" +
+        "<a id='download_button'  class='square_btn'>DOWNLOAD</a>\n" +
+        "      <br>\n" +
         "</div>\n" +
-        "       <div id='enlarged' class='hidden_tag'> </div>\n" +
+        "<div id='enlarged' class='hidden_tag'> </div>\n" +
         "  </div>"
 
     let main_section = $("#central");
@@ -62,6 +67,7 @@ $(document).ready(function () {
         landing.replaceWith(input_section);  // replace the landing element with the new input section
         let files = {}
         let fileList = []
+
         const submit_label = $("#submit_label");  // select the landing element by ID
         submit_label.addClass('hidden_tag')
         $("#image-input").change(function () {  // add a change event listener to the file input
@@ -84,7 +90,7 @@ $(document).ready(function () {
                             console.log('la key del file ', selected_files[i].name, ' esiste già: ', i, ' new key: ', new_key)
                             // if ('length' in Object.keys(files)) { new_key -= 1;}
                             // else {let new_key = Object.keys(files).length}
-                            console.log('lenght in',new_key)
+                            console.log('lenght in', new_key)
                             files = {...files, [new_key]: selected_files[i]}
                         } else {
                             files = {...files, [i]: selected_files[i]}
@@ -95,7 +101,10 @@ $(document).ready(function () {
             const dataTransfer = new DataTransfer();
             submit_label.removeClass('hidden_tag')
             for (let i = 0; i < Object.keys(files).length; i++) {
-                const file = new File([files[i]], files[i].name, {type: files[i].type, lastModified: files[i].lastModified});
+                const file = new File([files[i]], files[i].name, {
+                    type: files[i].type,
+                    lastModified: files[i].lastModified
+                });
                 dataTransfer.items.add(file);
             }
             fileList = dataTransfer.files;
@@ -114,16 +123,26 @@ $(document).ready(function () {
 
                     // add a load event listener to the file reader
                     reader.onload = function (event) {
-                        // create an image element
+                        const image_name = fileList[i].name
+                        scratched_images.push('')
+                        hd_images.push('')
+                        // create an tags element
                         let image = document.createElement("img");
+                        let image_div = document.createElement("div");
+                        let checkbox_1 = document.createElement("div");
+                        let checkbox_2 = document.createElement("div");
+
                         image.src = event.target.result;
-                        image.id = fileList[i].name;
-                        // console.log(image.src)
+                        image.id = image_name;
                         image.height = 200;
-                        image.style = "margin: 10px;"
+                        image_div.id = image_name + '_div';
+
+                        checkbox_1.innerHTML = '<input type="checkbox" class="checkbox" id="check_' + image_name + '" onchange="checkboxChanged(\'' + image_name + '\', \'' + i + '\', \'scratched\')" name="check_' + image_name + '"><label class="check_label" for="check_' + image_name + '" >with scratches</label>'
+                        checkbox_2.innerHTML = '<input type="checkbox" class="checkbox hd"  id="check_hd_' + image_name + '" disabled onchange="checkboxChanged(\'' + image_name + '\', \'' + i + '\', \'hd\')" name="check_hd_' + image_name + '"><label class="check_label" for="check_hd_' + image_name + '" >is HD</label>'
+                        // image.style = "margin: 10px;";
+                        // checkbox_1.style = "margin: 10px;";
+                        // image_div.style = "display: flex;flex-direction: column;align-items: baseline;";
                         image.onclick = function () {
-                            // console.log('click on image: ', image.id)
-                            // console.log('click on image: ', image.src)
                             let enlarged = $("#enlarged");
                             enlarged.html("<img src='" + image.src + "' height='80%' style='margin: 10px;'>")
                             enlarged.removeClass('hidden_tag')
@@ -131,9 +150,16 @@ $(document).ready(function () {
                                 enlarged.addClass('hidden_tag')
                             })
                         }
+                        image_div.appendChild(image);
+                        // checkbox_1.appendChild(checkbox);
+                        // checkbox_1.appendChild(label);
+                        image_div.appendChild(checkbox_1);
+                        image_div.appendChild(checkbox_2);
                         // add the image element to the selected images div
-                        $("#selected-images").append(image);
+                        $("#selected-images").append(image_div);
                     };
+
+
                     // read the selected file as a data URL
                     reader.readAsDataURL(files[i]);
                 }
@@ -149,10 +175,12 @@ $(document).ready(function () {
                 const files = fileList  // event.target.elements.image.files;
                 for (let i = 0; i < files.length; i++) {
                     formData.append('image', files[i]);
+                    formData.append('scratched', scratched_images[i] !== '' ? 'true' : 'false');
+                    formData.append('hd', hd_images[i] !== '' ? 'true' : 'false');
                 }
                 // select the landing element by ID
                 const input_section = $("#input-section");
-
+                console.log(formData)
                 // replace the landing element with the new input section
                 input_section.replaceWith(loading_div);
                 const loading = $("#loader");
@@ -187,15 +215,12 @@ $(document).ready(function () {
                         const output_strips = document.createElement("div");
                         output_strips.classList.add("output_strips");
                         output_strips.onclick = function () {
-                            // console.log('click on image: ', image.id)
-                            // console.log('click on image: ', image.src)
                             let enlarged = $("#enlarged");
-                            // for images in output_strips (input, paragon, output) add to enlarged div
-                            enlarged.html("<img src='" + input_image.src + "' style='max-width: 30vw'>" +
-                                          "<img src='" + paragon_image.src + "' style='max-width: 30vw'>" +
-                                            "<img src='" + output_image.src + "' style='max-width: 30vw'>")
+                            enlarged.html("<img src='" + input_image.src + "' class='enlarged-image'>" +
+                                "<img src='" + paragon_image.src + "' class='enlarged-image'>" +
+                                "<img src='" + output_image.src + "' class='enlarged-image'>")
 
-
+                            enlarge_images()
                             enlarged.removeClass('hidden_tag')
                             enlarged.click(function () {
                                 enlarged.addClass('hidden_tag')
@@ -206,9 +231,9 @@ $(document).ready(function () {
                         output_strips.append(paragon_image);
                         output_strips.append(output_image);
                         output_images.append(output_strips);
-
                     }
-
+                    const download_button = document.getElementById("download_button");
+                    download_button.addEventListener("click", downloadAllImages);
                 }).catch(error => {
                     console.error('Error uploading image', error);
                 });
@@ -228,3 +253,149 @@ function FileListItems(files) {
     }
     return b.files
 }
+
+
+function downloadImage(url, filename) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'images/' + filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function downloadAllImages() {
+    const images = document.querySelectorAll("#output-images img");
+    for (let i = 0; i < images.length; i++) {
+        const url = images[i].src;
+        const filename = url.split("/").pop();
+        if (filename.includes('output')) {
+            downloadImage(url, filename);
+        }
+    }
+}
+
+function checkboxChanged(file_name, number, which) {
+    const div = file_name + '_div'
+    console.log(div); //
+    // const check_name = '#check_' + file_name
+    console.log('index: ', this.name)
+    console.log('file_name: ', file_name)
+    // Check if 'scratched' checkbox is selected
+    const scratchedCheckbox = document.getElementById(`check_${file_name}`);
+    const scratchedChecked = scratchedCheckbox.checked;
+
+    // Activate 'hd' checkbox if 'scratched' is selected
+    const hdCheckbox = document.getElementById(`check_hd_${file_name}`);
+    if (scratchedChecked) {
+        hdCheckbox.disabled = false;
+    } else {
+        hdCheckbox.disabled = true;
+        hdCheckbox.checked = false;
+    }
+    if (which === 'scratched') {
+        if (scratched_images.indexOf(file_name) !== -1) {
+            scratched_images[number] = ''
+            console.log('removed: ', scratched_images)
+        } else {
+            scratched_images[number] = file_name
+            console.log('added: ', scratched_images)
+            //
+        }
+    } else if (which === 'hd') {
+        if (hd_images.indexOf(file_name) !== -1) {
+            hd_images[number] = ''
+            console.log('removed: ', hd_images)
+        } else {
+            hd_images[number] = file_name
+            console.log('added: ', hd_images)
+        }
+    }
+}
+
+async function enlarge_images() {
+    // Get the width and height of the #enlarged div
+    const enlargedDiv = document.querySelector('#enlarged');
+    const enlargedWidth = enlargedDiv.offsetWidth;
+    const enlargedHeight = enlargedDiv.offsetHeight;
+    console.log(enlargedWidth, enlargedHeight)
+    // Get the dimensions of each image and find the largest one
+    const images = document.querySelectorAll('.enlarged-image');
+    console.log(images)
+    let largestWidth = 0;
+    let largestHeight = 0;
+    let width = 0;
+    let height = 0;
+    await imageDimensions(images[0].src).then(dimensions => {
+        width = dimensions.width
+        height = dimensions.height
+        console.log(dimensions.width, dimensions.height)
+
+        console.log(width, height)
+        if (width > largestWidth) {
+            largestWidth = width;
+        }
+
+        if (height > largestHeight) {
+            largestHeight = height;
+        }
+
+        console.log(largestWidth, largestHeight)
+        // Calculate the maximum size for the three images
+        const maxWidth = (enlargedWidth - 20) / 3;
+        const maxHeight = enlargedHeight - 20;
+
+        // Determine the width and height for each image
+        let imageWidth = largestWidth;
+        let imageHeight = largestHeight;
+
+        if (imageWidth > maxWidth) {
+            imageWidth = maxWidth;
+            imageHeight = (largestHeight / largestWidth) * maxWidth;
+        }
+
+        if (imageHeight > maxHeight) {
+            imageHeight = maxHeight;
+            imageWidth = (largestWidth / largestHeight) * maxHeight;
+        }
+        console.log(imageWidth, imageHeight)
+        // Set the width and height for each image
+        images.forEach(image => {
+            image.style.width = imageWidth + 'px';
+            image.style.height = imageHeight + 'px';
+        });
+    })
+}
+
+// helper to get dimensions of an image
+const imageDimensions = file =>
+    new Promise((resolve, reject) => {
+        const img = new Image()
+
+        // the following handler will fire after a successful loading of the image
+        img.onload = () => {
+            const {naturalWidth: width, naturalHeight: height} = img
+            resolve({width, height})
+        }
+
+        // and this handler will fire if there was an error with the image (like if it's not really an image or a corrupted one)
+        img.onerror = () => {
+            reject('There was some problem with the image.')
+        }
+
+        img.src = file
+    })
+
+// here's how to use the helper
+const getInfo = async ({target: {files}}) => {
+    console.log(files)
+    const [file] = files
+
+    try {
+        const dimensions = await imageDimensions(file)
+        console.info(dimensions)
+    } catch (error) {
+        console.error(error)
+    }
+}
+
