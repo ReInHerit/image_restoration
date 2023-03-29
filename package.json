@@ -1,0 +1,19 @@
+{
+  "name": "old-photo-restorer",
+  "version": "1.0.0",
+  "description": "<img src='imgs/0001.jpg'/>",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/no-made/Bringing-Old-Photos-Back-to-Life.git"
+  },
+  "author": "no-made",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/no-made/Bringing-Old-Photos-Back-to-Life/issues"
+  },
+  "homepage": "https://github.com/no-made/Bringing-Old-Photos-Back-to-Life#readme"
+}

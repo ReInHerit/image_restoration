@@ -34,7 +34,7 @@
 
   - name: requirements setup
     pip:
-      requirements: "~/Bringing-Old-Photos-Back-to-Life/requirements.txt"
+      requirements: "~/Bringing-Old-Photos-Back-to-Life/requirements_old.txt"
       virtualenv: "~/Bringing-Old-Photos-Back-to-Life/.venv"
       virtualenv_command: /usr/bin/python3 -m venv .venv
 

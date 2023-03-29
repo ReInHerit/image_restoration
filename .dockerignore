@@ -1,0 +1,12 @@
+!/Face_Enhancement/models/networks/sync_batchnorm/
+!/Face_Enhancement/models/networks/tests/
+!/Face_Enhancement/models/networks/.gitignore
+!/Face_Enhancement/models/networks/LICENSE
+!/Face_Enhancement/models/networks/README.md
+!/Face_Enhancement/checkpoints/
+!/Global/checkpoints/
+!/Face_Detection/shape_predictor_68_face_landmarks.dat
+!/Face_Enhancement/models/networks/Synchronized-BatchNorm-PyTorch/
+
+/.env_template
+/Dockerfile

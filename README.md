@@ -77,7 +77,7 @@ cd ../
 Install dependencies:
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements_old.txt
 ```
 
 ## :rocket: How to use?

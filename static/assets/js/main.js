@@ -139,9 +139,7 @@ $(document).ready(function () {
 
                         checkbox_1.innerHTML = '<input type="checkbox" class="checkbox" id="check_' + image_name + '" onchange="checkboxChanged(\'' + image_name + '\', \'' + i + '\', \'scratched\')" name="check_' + image_name + '"><label class="check_label" for="check_' + image_name + '" >with scratches</label>'
                         checkbox_2.innerHTML = '<input type="checkbox" class="checkbox hd"  id="check_hd_' + image_name + '" disabled onchange="checkboxChanged(\'' + image_name + '\', \'' + i + '\', \'hd\')" name="check_hd_' + image_name + '"><label class="check_label" for="check_hd_' + image_name + '" >is HD</label>'
-                        // image.style = "margin: 10px;";
-                        // checkbox_1.style = "margin: 10px;";
-                        // image_div.style = "display: flex;flex-direction: column;align-items: baseline;";
+
                         image.onclick = function () {
                             let enlarged = $("#enlarged");
                             enlarged.html("<img src='" + image.src + "' height='80%' style='margin: 10px;'>")
@@ -151,8 +149,6 @@ $(document).ready(function () {
                             })
                         }
                         image_div.appendChild(image);
-                        // checkbox_1.appendChild(checkbox);
-                        // checkbox_1.appendChild(label);
                         image_div.appendChild(checkbox_1);
                         image_div.appendChild(checkbox_2);
                         // add the image element to the selected images div

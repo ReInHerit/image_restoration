@@ -1,13 +1,11 @@
 import numpy as np
-import cv2
-import PySimpleGUI as sg
 import os.path
 import argparse
 import os
 import sys
 import shutil
 from subprocess import call
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 from PIL import Image
 import torch
@@ -15,11 +13,6 @@ import torch
 print(f"Is CUDA supported by this system? {torch.cuda.is_available()}")
 print(f"CUDA version: {torch.version.cuda}")
 
-# Storing ID of current CUDA device
-cuda_id = torch.cuda.current_device()
-print(f"ID of current CUDA device:{torch.cuda.current_device()}")
-
-print(f"Name of current CUDA device:{torch.cuda.get_device_name(cuda_id)}")
 app = Flask(__name__)
 CORS(app)
 input_folder = './media/input_images'
@@ -57,7 +50,7 @@ def upload_image():
         img.save(input_filename)
 
     modify()
-    for file in os.listdir(output_folder+'/stage_1_restore_output/input_image'):
+    for file in os.listdir(os.path.join(output_folder, 'stage_1_restore_output', 'input_image')):
         processed_images.append(file)
     differences(input_folder)
     differences(input_scratched)
@@ -66,21 +59,25 @@ def upload_image():
     return jsonify({'images': processed_images})
 
 
-def modify(image_filename=None, cv2_frame=None, scratched = None):
+def modify(image_filename=None, cv2_frame=None, scratched=None):
     def run_cmd(command):
         try:
             call(command, shell=True)
         except KeyboardInterrupt:
             print("Process interrupted")
             sys.exit(1)
-
+    gpu = -1
+    if torch.cuda.is_available():
+        cuda_id = torch.cuda.current_device()
+        gpu = cuda_id
+    gpu = str(gpu)
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_folder", type=str, default=input_folder, help="Test images")
     parser.add_argument("--input_scratched", type=str, default=input_scratched, help="Test images")
     parser.add_argument("--input_hd", type=str, default=input_hd, help="Test images")
     parser.add_argument("--output_folder", type=str, default=output_folder,
                         help="Restored images, please use the absolute path")
-    parser.add_argument("--GPU", type=str, default="-1", help="0,1,2")
+    parser.add_argument("--GPU", type=str, default=gpu, help="0,1,2")
     parser.add_argument("--checkpoint_name", type=str, default="Setting_9_epoch_100", help="choose which checkpoint")
     parser.add_argument("--with_scratch", default="--with_scratch", action="store_true")
 
@@ -183,7 +180,6 @@ def modify(image_filename=None, cv2_frame=None, scratched = None):
     # Stage 4: Warp back
     print("Running Stage 4: Blending")
     os.chdir(os.path.join(main_environment, "Face_Detection"))
-    # os.chdir(".././Face_Detection")
     stage_4_input_image_dir = os.path.join(stage_1_output_dir, "restored_image")
     stage_4_input_face_dir = os.path.join(stage_3_output_dir, "each_img")
     stage_4_output_dir = os.path.join(opts.output_folder, "final_output")
@@ -206,48 +202,40 @@ def delete_and_make_folder(folder):
 
 
 def differences(folder):
-    check_folder = output_folder + '/stage_1_restore_output/input_image'
+    check_folder = os.path.join(output_folder, 'stage_1_restore_output', 'input_image')
     check_files = os.listdir(check_folder)
     for file in os.listdir(folder):
         print(file)
-        name, ext = file.split('.')
+        name, ext = os.path.splitext(file)
         for filename in check_files:
-            # check if the filename (without extension) matches the one we're looking for
             if os.path.splitext(filename)[0] == name:
-                # if it does, get the extension using os.path.splitext and print it
                 ext = os.path.splitext(filename)[1]
-                print(f"Found file '{filename}' with extension '{ext}'")
+                break
 
         input_src = os.path.join(folder, file)
         output_src = os.path.join(output_folder, 'final_output', name + ext)
         input_f = os.path.join(media_folder, name + '_input' + ext)
         output_f = os.path.join(media_folder, name + '_output' + ext)
         paragon_f = os.path.join(media_folder, name + '_paragon' + ext)
+
         shutil.copy(input_src, input_f)
         shutil.copy(output_src, output_f)
+
         input_image = Image.open(input_f)
         output_image = Image.open(output_f)
-        size_input = input_image.size
-        size_output = output_image.size
-        if size_input != size_output:
-            output_image = output_image.resize(size_input)
+
+        if input_image.size != output_image.size:
+            output_image = output_image.resize(input_image.size)
             output_image.save(output_f)
 
-        # convert to numpy arrays and subtract
-        input_array = np.array(input_image)
-        output_array = np.array(output_image)
-        input_gray = np.dot(input_array[..., :3], [0.2989, 0.5870, 0.1140])
-        output_gray = np.dot(output_array[..., :3], [0.2989, 0.5870, 0.1140])
+        input_gray = np.dot(np.array(input_image)[..., :3], [0.2989, 0.5870, 0.1140])
+        output_gray = np.dot(np.array(output_image)[..., :3], [0.2989, 0.5870, 0.1140])
 
-        result = (input_gray - output_gray)
+        result = np.maximum(input_gray - output_gray, 0)
 
-        # set negative values to zero
-        result[result < 0] = 0
-
-        # convert back to PIL image and save
         result_image = Image.fromarray(result.astype('uint8'))
         result_image.save(paragon_f)
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
