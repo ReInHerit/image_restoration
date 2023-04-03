@@ -15,6 +15,10 @@
     <script type="text/javascript">
         DJANGO_STATIC_URL = '{{ STATIC_URL }}';
         DJANGO_MEDIA_URL = '{{ MEDIA_URL }}';
+        window.user_id = "{{ user_id }}";
+        window.protocol = "{{ protocol }}";
+        window.host = "{{ host }}";
+        window.port = "{{ port }}";
     </script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Satisfy"

@@ -1,22 +1,26 @@
 let selected_images = [];
 let scratched_images = [];
 let hd_images = [];
+
+
 $(document).ready(function () {
+    const user_id = window.user_id;
+    const port = window.port;
+    const host = window.host;
+    const protocol = window.protocol;
     const landing_section = "<div id=\"landing\">\n" +
-        "            <h1>Welcome to ReInHerit's Old Photos' Restorer!</h1> <p>Our virtual toolkit is designed to help museum owners and enthusiasts restore old photos with ease. " +
-    "       <p>Simply upload your photo, with or without scratches, and watch as our advanced processing algorithms work their magic. Once the image processing is complete, you'll have a fully restored photo to cherish and share with future generations. <br>" +
-        "Try it out today and rediscover the beauty of your old photographs.</p>\n" +
+        "            <h1>Welcome to ReInHerit's Old Photos' Restorer!</h1> <p>Our virtual toolkit has been designed to assist museum owners and enthusiasts in effortlessly restoring old photos. " +
+    "       <p>By simply uploading your photo, whether it has scratches or not, our advanced processing algorithms will work their magic. Once the image processing is complete, you will have a fully restored photo to cherish and share with future generations.<br>" +
+        "Try it out today and rediscover the beauty of your old photographs!</p>\n" +
         "            <img id=\"cover_image\" alt=\"landing image\" src=\"static/assets/images/scratch_detection.png\">\n" +
         "            <a id=\"start_button\"  class=\"square_btn\">START TO RESTORE</a>\n" +
         "        </div>"
     const input_section = "<div id=\"input-section\" \">\n" +
         "  <div id='input-description'>\n" +
         "  <h1>INPUT</h1>\n" +
-        "  <p class='vertical'>You can select the images you want to load from your hard disk by browsing to the folder where they are stored. \n" +
+        "  <p class='vertical'>To load images from your hard disk, browse to the folder where they're stored and select the ones you want. You can load as many images as you'd like from the same folder. However, keep in mind that the more files you choose and the larger their size, the longer it will take to process and load them. So, please be patient while the files are being processed. \n" +
         "      <br>\n" +
-        "      You can load as many images as you want from the same folder. However, please keep in mind that the more files you select and the larger they are in size, the longer it will take for the files to be processed and loaded.\n" +
-        "      <br>\n" +
-        "      So, it's important to be patient while the files are being processed.</p>\n" +
+        "      If a photo has scratches or damage that needs to be repaired, select the 'with scratches' checkbox. And if the image with scratches has a DPI (dots per inch) of 300 or higher, select the checkbox labeled 'is HD'.</p>\n" +
         "  </div>\n" +
         "  <form id=\"image-form\">\n" +
         "      <a class=\"square_btn\" type=\"button\" onclick=\"document.getElementById('image-input').click(); return false;\"> BROWSE </a>\n" +
@@ -45,11 +49,16 @@ $(document).ready(function () {
         "               <li>The second is an image of comparison on the areas most affected by the process.</li>\n" +
         "               <li>The third image is the output image</li>\n" +
         "           </ul>\n" +
-        "       <p>Clicking on DOWNLOAD button the outputs will be stored on your PC.</p></div>\n" +
+        "       <p>If you click the DOWNLOAD button, the app saves the outputs to your PC and returns to the home page.</p>\n" +
+        "       <p>If you click the RESTART button, the app returns to the home page and deletes all the processed images.</p></div>\n" +
         "  </div>\n" +
         "  <div id=\"output-images\">\n" +
         "  </div>\n" +
-        "<a id='download_button'  class='square_btn'>DOWNLOAD</a>\n" +
+        "<div id='buttons'>" +
+        "   <a id='download_button'  class='square_btn'>DOWNLOAD</a>\n" +
+        "   <p id='or'> or </p>\n" +
+        "   <a id='restart_button'  class='square_btn'>RESTART</a>\n" +
+        "</div>\n" +
         "      <br>\n" +
         "</div>\n" +
         "<div id='enlarged' class='hidden_tag'> </div>\n" +
@@ -82,15 +91,12 @@ $(document).ready(function () {
                         e.name === selected_files[i].name &&
                         e.size === selected_files[i].size &&
                         e.type === selected_files[i].type)) {
-                        console.log('il file ', selected_files[i].name, ' esiste già')
+                        console.log(selected_files[i].name + ' already exists')
                     } else {
                         // does the key already exist in files object? if yes, create a new key
                         if (Object.keys(files).some(e => Number(e) === i)) {
                             let new_key = Object.keys(files).length
-                            console.log('la key del file ', selected_files[i].name, ' esiste già: ', i, ' new key: ', new_key)
-                            // if ('length' in Object.keys(files)) { new_key -= 1;}
-                            // else {let new_key = Object.keys(files).length}
-                            console.log('lenght in', new_key)
+
                             files = {...files, [new_key]: selected_files[i]}
                         } else {
                             files = {...files, [i]: selected_files[i]}
@@ -108,7 +114,6 @@ $(document).ready(function () {
                 dataTransfer.items.add(file);
             }
             fileList = dataTransfer.files;
-            console.log('fileList: ', fileList)
             // loop through the selected files
             for (let i = 0; i < fileList.length; i++) {
                 console.log('file ', i, ': ', fileList[i].name)
@@ -116,7 +121,6 @@ $(document).ready(function () {
                     e.name === fileList[i].name &&
                     e.size === fileList[i].size &&
                     e.type === fileList[i].type)) {
-                    console.log('file ', i, ': ', fileList[i].name, ' is not in selected_images')
                     selected_images.push(fileList[i])
                     // create a file reader
                     var reader = new FileReader();
@@ -166,11 +170,10 @@ $(document).ready(function () {
             document.getElementById('image-form').addEventListener('submit', (event) => {
                 event.preventDefault();
                 const formData = new FormData();
-                console.log('fileList2: ', fileList)
-                // console.log('files: ', event.target.elements.image.files)
                 const files = fileList  // event.target.elements.image.files;
+                console.log('files: ', files)
                 for (let i = 0; i < files.length; i++) {
-                    formData.append('image', files[i]);
+                    formData.append('base', files[i]);
                     formData.append('scratched', scratched_images[i] !== '' ? 'true' : 'false');
                     formData.append('hd', hd_images[i] !== '' ? 'true' : 'false');
                 }
@@ -180,12 +183,14 @@ $(document).ready(function () {
                 // replace the landing element with the new input section
                 input_section.replaceWith(loading_div);
                 const loading = $("#loader");
-                // loading.style.display = "block"
-                fetch('http://127.0.0.1:5000/upload-image', {
+                console.log(protocol, host, user_id)
+                fetch(`${protocol}://${host}:5000/upload-image`, {
                     method: 'POST',
+                    headers: {
+                        'X-User-Id': user_id,
+                    },
                     body: formData
                 }).then(response => {
-                    console.log(response)
                     if (response.ok) {
                         console.log('Image uploaded successfully');
                         return response.json()
@@ -203,9 +208,10 @@ $(document).ready(function () {
                         const input_image = document.createElement("img");
                         const output_image = document.createElement("img");
                         const paragon_image = document.createElement("img");
-                        output_image.src = DJANGO_MEDIA_URL + name + '_output.' + ext;
-                        input_image.src = DJANGO_MEDIA_URL + name + '_input.' + ext;
-                        paragon_image.src = DJANGO_MEDIA_URL + name + '_paragon.' + ext;
+                        console.log('django media url: ', DJANGO_MEDIA_URL )
+                        output_image.src = DJANGO_MEDIA_URL+ user_id+ '/' + name + '_output.' + ext;
+                        input_image.src = DJANGO_MEDIA_URL + user_id+ '/' + name + '_input.' + ext;
+                        paragon_image.src = DJANGO_MEDIA_URL + user_id+ '/' + name + '_paragon.' + ext;
                         output_image.height = input_image.height = paragon_image.height = 200;
 
                         const output_strips = document.createElement("div");
@@ -229,7 +235,23 @@ $(document).ready(function () {
                         output_images.append(output_strips);
                     }
                     const download_button = document.getElementById("download_button");
-                    download_button.addEventListener("click", downloadAllImages);
+                    const restart_button = document.getElementById("restart_button");
+                    download_button.addEventListener("click", function() {
+                        downloadAllImages(user_id, protocol, host);
+                    });
+                    restart_button.addEventListener("click", function () {
+                        //delete temp folder
+                        fetch(`${protocol}://${host}:5000/delete-temp-folder/` + user_id, {
+                            method: 'DELETE',
+                        })
+                        .then(response => {
+                            location.reload();
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
+
+                    })
                 }).catch(error => {
                     console.error('Error uploading image', error);
                 });
@@ -260,23 +282,29 @@ function downloadImage(url, filename) {
     document.body.removeChild(link);
 }
 
-function downloadAllImages() {
+async function downloadAllImages(user, protocol,host) {
     const images = document.querySelectorAll("#output-images img");
+    const downloadPromises = [];
     for (let i = 0; i < images.length; i++) {
         const url = images[i].src;
         const filename = url.split("/").pop();
         if (filename.includes('output')) {
-            downloadImage(url, filename);
+            downloadPromises.push(downloadImage(url, filename));
         }
     }
+    await fetch(`${protocol}://${host}:5000/delete-temp-folder/` + user, {
+            method: 'DELETE',
+        })
+        .then(response => {
+            console.log(response);
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    location.reload();
 }
 
 function checkboxChanged(file_name, number, which) {
-    const div = file_name + '_div'
-    console.log(div); //
-    // const check_name = '#check_' + file_name
-    console.log('index: ', this.name)
-    console.log('file_name: ', file_name)
     // Check if 'scratched' checkbox is selected
     const scratchedCheckbox = document.getElementById(`check_${file_name}`);
     const scratchedChecked = scratchedCheckbox.checked;
@@ -296,7 +324,6 @@ function checkboxChanged(file_name, number, which) {
         } else {
             scratched_images[number] = file_name
             console.log('added: ', scratched_images)
-            //
         }
     } else if (which === 'hd') {
         if (hd_images.indexOf(file_name) !== -1) {
@@ -314,10 +341,8 @@ async function enlarge_images() {
     const enlargedDiv = document.querySelector('#enlarged');
     const enlargedWidth = enlargedDiv.offsetWidth;
     const enlargedHeight = enlargedDiv.offsetHeight;
-    console.log(enlargedWidth, enlargedHeight)
     // Get the dimensions of each image and find the largest one
     const images = document.querySelectorAll('.enlarged-image');
-    console.log(images)
     let largestWidth = 0;
     let largestHeight = 0;
     let width = 0;
@@ -325,9 +350,7 @@ async function enlarge_images() {
     await imageDimensions(images[0].src).then(dimensions => {
         width = dimensions.width
         height = dimensions.height
-        console.log(dimensions.width, dimensions.height)
 
-        console.log(width, height)
         if (width > largestWidth) {
             largestWidth = width;
         }
@@ -336,7 +359,6 @@ async function enlarge_images() {
             largestHeight = height;
         }
 
-        console.log(largestWidth, largestHeight)
         // Calculate the maximum size for the three images
         const maxWidth = (enlargedWidth - 20) / 3;
         const maxHeight = enlargedHeight - 20;
@@ -354,7 +376,6 @@ async function enlarge_images() {
             imageHeight = maxHeight;
             imageWidth = (largestWidth / largestHeight) * maxHeight;
         }
-        console.log(imageWidth, imageHeight)
         // Set the width and height for each image
         images.forEach(image => {
             image.style.width = imageWidth + 'px';

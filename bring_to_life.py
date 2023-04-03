@@ -9,12 +9,17 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 from PIL import Image
 import torch
+from django.conf import settings
+
+# protocol = os.getenv('PROTOCOL', settings.PROTOCOL)
+# host = os.getenv('HOST', settings.HOST)
 
 print(f"Is CUDA supported by this system? {torch.cuda.is_available()}")
 print(f"CUDA version: {torch.version.cuda}")
 
 app = Flask(__name__)
 CORS(app)
+
 input_folder = './media/input_images'
 input_scratched = './media/input_scratched_images'
 input_hd = './media/input_hd_images'
@@ -24,18 +29,22 @@ output_folder = './media/output_images'
 @app.route('/upload-image', methods=['POST'])
 @cross_origin()
 def upload_image():
+    global input_folder, input_scratched, input_hd, media_folder, output_folder
+    user_id = request.headers.get('X-USER-ID')
+    media_folder = './media/' + user_id
+    input_folder = media_folder + '/input_images'
+    input_scratched = media_folder + '/input_scratched_images'
+    input_hd = media_folder + '/input_hd_images'
+    output_folder = media_folder + '/output_images'
     folders = [media_folder, input_folder, input_scratched, input_hd, output_folder]
     processed_images = []
     for folder in folders:
         delete_and_make_folder(folder)
-
-    files = request.files.getlist('image')
+    files = request.files.getlist('base')
     scratched = request.values.getlist('scratched')
     hd_files = request.values.getlist('hd')
-
     if not files:
         return jsonify({'error': 'No images found'})
-
     for i in range(len(files)):
         image = files[i]
         if image.content_type not in ['image/jpeg', 'image/png']:
@@ -55,8 +64,13 @@ def upload_image():
     differences(input_folder)
     differences(input_scratched)
     differences(input_hd)
-
     return jsonify({'images': processed_images})
+
+@app.route('/delete-temp-folder/<user>', methods=['DELETE'])
+def delete_temp_folder(user):
+    folder_path = f'./media/{user}'
+    shutil.rmtree(folder_path, ignore_errors=True)
+    return jsonify({'message': f'Temp folder for user {user} has been deleted.'})
 
 
 def modify(image_filename=None, cv2_frame=None, scratched=None):
@@ -205,7 +219,6 @@ def differences(folder):
     check_folder = os.path.join(output_folder, 'stage_1_restore_output', 'input_image')
     check_files = os.listdir(check_folder)
     for file in os.listdir(folder):
-        print(file)
         name, ext = os.path.splitext(file)
         for filename in check_files:
             if os.path.splitext(filename)[0] == name:

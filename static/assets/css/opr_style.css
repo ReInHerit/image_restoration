@@ -249,7 +249,7 @@ text-decoration: none;
     text-align: center;
     margin-bottom: 5px;
     width: 100%;
-    max-width: 80vw;
+    max-width: 90vw;
 }
 @media screen and (max-width: 449px) {
     main{
@@ -471,7 +471,14 @@ input[type=file]::file-selector-button:hover {
     background: #fdf003;
     color: #11303b;
 }
-
+#buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+#or {
+    padding: 0 10px;
+}
 #enlarged {
     display: flex;
     z-index: 1000;
