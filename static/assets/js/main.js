@@ -8,43 +8,44 @@ $(document).ready(function () {
     const port = window.port;
     const host = window.host;
     const protocol = window.protocol;
-    const landing_section = "<div id=\"landing\">\n" +
+    const landing_section = "<div id='landing'>\n" +
         "            <h1>Welcome to ReInHerit's Old Photos' Restorer!</h1> <p>Our virtual toolkit has been designed to assist museum owners and enthusiasts in effortlessly restoring old photos. " +
     "       <p>By simply uploading your photo, whether it has scratches or not, our advanced processing algorithms will work their magic. Once the image processing is complete, you will have a fully restored photo to cherish and share with future generations.<br>" +
         "Try it out today and rediscover the beauty of your old photographs!</p>\n" +
-        "            <img id=\"cover_image\" alt=\"landing image\" src=\"static/assets/images/scratch_detection.png\">\n" +
-        "            <a id=\"start_button\"  class=\"square_btn\">START TO RESTORE</a>\n" +
+        "            <img id='cover_image' alt='landing image' src='static/assets/images/scratch_detection.png'>\n" +
+        "            <a id='start_button'  class='square_btn'>START TO RESTORE</a>\n" +
         "        </div>"
-    const input_section = "<div id=\"input-section\" \">\n" +
+    const input_section = "<div id='input-section'>\n" +
         "  <div id='input-description'>\n" +
         "  <h1>INPUT</h1>\n" +
         "  <p class='vertical'>To load images from your hard disk, browse to the folder where they're stored and select the ones you want. You can load as many images as you'd like from the same folder. However, keep in mind that the more files you choose and the larger their size, the longer it will take to process and load them. So, please be patient while the files are being processed. \n" +
         "      <br>\n" +
         "      If a photo has scratches or damage that needs to be repaired, select the 'with scratches' checkbox. And if the image with scratches has a DPI (dots per inch) of 300 or higher, select the checkbox labeled 'is HD'.</p>\n" +
         "  </div>\n" +
-        "  <form id=\"image-form\">\n" +
-        "      <a class=\"square_btn\" type=\"button\" onclick=\"document.getElementById('image-input').click(); return false;\"> BROWSE </a>\n" +
-        "      <input type=\"file\" id=\"image-input\" name=\"image\" class='hidden_tag' accept=\"image/*\" multiple>\n" +
-        "      <div id=\"selected-images\" ></div>\n" +
+        "  <form id='image-form'>\n" +
+        "      <a class='square_btn' type='button' onclick=\"document.getElementById('image-input').click(); return false;\"> BROWSE </a>\n" +
+        "      <input type='file' id='image-input' name='image' class='hidden_tag' accept='image/*' multiple>\n" +
+        "      <div id='selected-images' ></div>\n" +
         "      <br>\n" +
-        "      <a id='submit_label' class=\"square_btn\" type=\"button\" onclick=\"document.getElementById('submit-button').click(); return false;\"> PROCESS </a>\n" +
-        "      <button id='submit-button' type=\"submit\" class='hidden_tag'></button>\n" +
+        "      <a id='submit_label' class='square_btn' type='button' onclick=\"document.getElementById('submit-button').click(); return false;\"> PROCESS </a>\n" +
+        "      <button id='submit-button' type='submit' class='hidden_tag'></button>\n" +
         "      <br>\n" +
         "  </form>\n" +
         "  <div id='enlarged' class='hidden_tag'> </div>\n" +
         "  </div>"
 
-    // const loading_div = "<div id=\"loading-container\"><p>PROCESSING IMAGES</p></div>"
-    const loading_div = "<div id=\"loader\">\n" +
-        "  <div id=\"shadow\"></div>\n" +
-        "  <div id=\"box\"></div>\n" +
+    const loading_div = "<div id='loader'>\n" +
+        "  <p id='shadow'></p>\n" +
+        "  <div id='shadow'></div>\n" +
+        "  <div id='box'></div>\n" +
+        "  <input type='text' id='loading-text' value='Starting process...' />\n" +
         "</div>"
 
-    const output_section = "<div id=\"output-section\">\n" +
+    const output_section = "<div id='output-section'>\n" +
         "  <div id='output-description'>\n" +
         "       <h1>OUTPUT</h1>\n" +
         "       <div class='vertical'><p>Here you can see the results of the processing:</p>" +
-        "           <ul style=\"list-style-type:disc;\">\n" +
+        "           <ul style='list-style-type:disc;'>\n" +
         "               <li>The first image is the original image</li>\n" +
         "               <li>The second is an image of comparison on the areas most affected by the process.</li>\n" +
         "               <li>The third image is the output image</li>\n" +
@@ -52,7 +53,7 @@ $(document).ready(function () {
         "       <p>If you click the DOWNLOAD button, the app saves the outputs to your PC and returns to the home page.</p>\n" +
         "       <p>If you click the RESTART button, the app returns to the home page and deletes all the processed images.</p></div>\n" +
         "  </div>\n" +
-        "  <div id=\"output-images\">\n" +
+        "  <div id='output-images'>\n" +
         "  </div>\n" +
         "<div id='buttons'>" +
         "   <a id='download_button'  class='square_btn'>DOWNLOAD</a>\n" +
@@ -182,8 +183,18 @@ $(document).ready(function () {
                 console.log(formData)
                 // replace the landing element with the new input section
                 input_section.replaceWith(loading_div);
+
                 const loading = $("#loader");
-                console.log(protocol, host, user_id)
+                const messages = ['Loading...', 'Please wait...', 'Almost done...', 'Hang tight...'];
+                // Get a reference to the loading text field
+                const loading_text = document.getElementById('loading-text');
+                // Start an interval to change the text every 10 seconds
+                let index = 0;
+                setInterval(() => {
+                  loading_text.value = messages[index];
+                  index = (index + 1) % messages.length;
+                }, 5000);
+
                 fetch(`${protocol}://${host}:5000/upload-image`, {
                     method: 'POST',
                     headers: {
