@@ -10,7 +10,7 @@ $(document).ready(function () {
     const protocol = window.protocol;
     const landing_section = "<div id='landing'>\n" +
         "            <h1>Welcome to ReInHerit's Old Photos' Restorer!</h1> <p>Our virtual toolkit has been designed to assist museum owners and enthusiasts in effortlessly restoring old photos. " +
-    "       <p>By simply uploading your photo, whether it has scratches or not, our advanced processing algorithms will work their magic. Once the image processing is complete, you will have a fully restored photo to cherish and share with future generations.<br>" +
+        "       <p>By simply uploading your photo, whether it has scratches or not, our advanced processing algorithms will work their magic. Once the image processing is complete, you will have a fully restored photo to cherish and share with future generations.<br>" +
         "Try it out today and rediscover the beauty of your old photographs!</p>\n" +
         "            <img id='cover_image' alt='landing image' src='static/assets/images/scratch_detection.png'>\n" +
         "            <a id='start_button'  class='square_btn'>START TO RESTORE</a>\n" +
@@ -191,8 +191,8 @@ $(document).ready(function () {
                 // Start an interval to change the text every 10 seconds
                 let index = 0;
                 setInterval(() => {
-                  loading_text.value = messages[index];
-                  index = (index + 1) % messages.length;
+                    loading_text.value = messages[index];
+                    index = (index + 1) % messages.length;
                 }, 5000);
 
                 fetch(`${protocol}://${host}:5000/upload-image`, {
@@ -219,10 +219,10 @@ $(document).ready(function () {
                         const input_image = document.createElement("img");
                         const output_image = document.createElement("img");
                         const paragon_image = document.createElement("img");
-                        console.log('django media url: ', DJANGO_MEDIA_URL )
-                        output_image.src = DJANGO_MEDIA_URL+ user_id+ '/' + name + '_output.' + ext;
-                        input_image.src = DJANGO_MEDIA_URL + user_id+ '/' + name + '_input.' + ext;
-                        paragon_image.src = DJANGO_MEDIA_URL + user_id+ '/' + name + '_paragon.' + ext;
+                        console.log('django media url: ', DJANGO_MEDIA_URL)
+                        output_image.src = DJANGO_MEDIA_URL + user_id + '/' + name + '_output.' + ext;
+                        input_image.src = DJANGO_MEDIA_URL + user_id + '/' + name + '_input.' + ext;
+                        paragon_image.src = DJANGO_MEDIA_URL + user_id + '/' + name + '_paragon.' + ext;
                         output_image.height = input_image.height = paragon_image.height = 200;
 
                         const output_strips = document.createElement("div");
@@ -247,7 +247,7 @@ $(document).ready(function () {
                     }
                     const download_button = document.getElementById("download_button");
                     const restart_button = document.getElementById("restart_button");
-                    download_button.addEventListener("click", function() {
+                    download_button.addEventListener("click", function () {
                         downloadAllImages(user_id, protocol, host);
                     });
                     restart_button.addEventListener("click", function () {
@@ -261,8 +261,8 @@ $(document).ready(function () {
                         .catch(error => {
                             console.error(error);
                         });
-
                     })
+
                 }).catch(error => {
                     console.error('Error uploading image', error);
                 });
@@ -271,7 +271,33 @@ $(document).ready(function () {
         });
 
     });
-
+    window.addEventListener('beforeunload', function (event) {
+        // event.preventDefault(); // prevent default behavior of the event
+        fetch(`${protocol}://${host}:5000/delete-temp-folder/` + user_id, {
+                            method: 'DELETE',
+                            keepalive: true,
+                        })
+                        .then(response => {
+                            location.reload();
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
+        // console
+        // var xhr = new XMLHttpRequest();
+        // console.log('sending request')
+        // xhr.open('DELETE', `${protocol}://${host}:5000/delete-temp-folder/` + user_id, true); // set async to true
+        // xhr.send();
+        // xhr.onreadystatechange = function() {
+        //     if (xhr.readyState === XMLHttpRequest.DONE) {
+        //         if (xhr.status === 200) {
+        //             console.log('Request sent successfully');
+        //         } else {
+        //             console.error('Error sending request');
+        //         }
+        //     }
+        // }
+    });
 
 });
 
@@ -293,7 +319,7 @@ function downloadImage(url, filename) {
     document.body.removeChild(link);
 }
 
-async function downloadAllImages(user, protocol,host) {
+async function downloadAllImages(user, protocol, host) {
     const images = document.querySelectorAll("#output-images img");
     const downloadPromises = [];
     for (let i = 0; i < images.length; i++) {
@@ -304,8 +330,8 @@ async function downloadAllImages(user, protocol,host) {
         }
     }
     await fetch(`${protocol}://${host}:5000/delete-temp-folder/` + user, {
-            method: 'DELETE',
-        })
+        method: 'DELETE',
+    })
         .then(response => {
             console.log(response);
         })
