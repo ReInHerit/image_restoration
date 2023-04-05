@@ -1,24 +1,36 @@
-# Old Photo Restoration (Official PyTorch Implementation)
+# Reinherit Toolkits: Old Photos' Restorer
 
-<img src='imgs/0001.jpg'/>
 
-### [Project Page](http://raywzy.com/Old_Photo/) | [Paper (CVPR version)](https://arxiv.org/abs/2004.09484) | [Paper (Journal version)](https://arxiv.org/pdf/2009.07047v1.pdf) | [Pretrained Model](https://hkustconnect-my.sharepoint.com/:f:/g/personal/bzhangai_connect_ust_hk/Em0KnYOeSSxFtp4g_dhWdf0BdeT3tY12jIYJ6qvSf300cA?e=nXkJH2) | [Colab Demo](https://colab.research.google.com/drive/1NEm6AsybIiC5TwTU_4DqDkQO0nFRB-uA?usp=sharing)  | [Replicate Demo & Docker Image](https://replicate.ai/zhangmozhe/bringing-old-photos-back-to-life) :fire:
-
-**Bringing Old Photos Back to Life, CVPR2020 (Oral)**
+**Based on Bringing Old Photos Back to Life, CVPR2020 (Oral)**
 
 
 <img src='imgs/HR_result.png'>
 
-Training code is available and welcome to have a try and learn the training details. 
+## How to run the app
+You can choose to test the app in two ways:
+- creating a python virtual environment
+- using docker
+
+Follow above prerequisites and instructions paying attention to the parts relating to the chosen method.
+
+### Prerequisites
+- **Python 3.10** installed on your machine. If you don't have it, you can download it from the official website: https://www.python.org/downloads/ or follow this online guide: https://realpython.com/installing-python/ to install Python on your machine.
+- **Javascript** enabled on your browser. If not, you can follow this online guide: https://www.enable-javascript.com/
+
+## Requirements
+Depending on which method you have chosen to test the app you must:
+  - **Python Virtual Environment**: we recommend using Conda to manage virtual environments, so check in your terminal or command prompt if you have Conda installed by running the command 
+    ```
+    conda --version 
+    ``` 
+    If Conda is not installed, follow the installation instructions from the official Anaconda website: https://docs.anaconda.com/anaconda/install/
+  - **Docker**: you'll need to set up and run Docker on your operating system. If you are not familiar with Docker, please refer to the official documentation [here](https://docs.docker.com/). 
 
 
-## Requirement
-The code is tested on Ubuntu with Nvidia GPUs and CUDA installed. Python>=3.6 is required to run the code.
-
-## Installation
-
-Clone the Synchronized-BatchNorm-PyTorch repository for
-
+## Clone this repository and install models and checkpoints
+### 1. Clone this repository on your PC. 
+### 2. Clone the Synchronized-BatchNorm-PyTorch repository 
+In a terminal go to the project folder and run the following code:
 ```
 cd Face_Enhancement/models/networks/
 git clone https://github.com/vacancy/Synchronized-BatchNorm-PyTorch
@@ -33,8 +45,8 @@ cp -rf Synchronized-BatchNorm-PyTorch/sync_batchnorm .
 cd ../../
 ```
 
-Download the landmark detection pretrained model
-
+### 3. Download the landmark detection pretrained model
+In a terminal go to the project folder and run the following code:
 ```
 cd Face_Detection/
 wget http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
@@ -42,8 +54,9 @@ bzip2 -d shape_predictor_68_face_landmarks.dat.bz2
 cd ../
 ```
 
-Download the pretrained model, put the file `Face_Enhancement/checkpoints.zip` under `./Face_Enhancement`, and put the file `Global/checkpoints.zip` under `./Global`. Then unzip them respectively.
-
+### 4. Download the pretrained model
+Put the file _**Face_Enhancement/checkpoints.zip**_ under **_./Face_Enhancement,_** and put the file **_Global/checkpoints.zip_** under **_./Global_**. Then unzip them respectively.
+Use this code:
 ```
 cd Face_Enhancement/
 wget https://github.com/microsoft/Bringing-Old-Photos-Back-to-Life/releases/download/v1.0/face_checkpoints.zip
@@ -54,27 +67,78 @@ wget https://github.com/microsoft/Bringing-Old-Photos-Back-to-Life/releases/down
 unzip global_checkpoints.zip
 cd ../
 ```
+### 5. Manage secret keys
+A **Django secret key** is required, **Google Analytics** is optional. \
+Edit the .env_template file with your own settings and rename it to .env. 
+#### ___Django secret key___: 
+1. You can generate one by typing in a terminal: <br> 
+   ```
+   python getYourDjangoKey.py
+   ```
+2. copy and paste the generated key in the DJANGO_KEY field of the .env file. 
 
-Install dependencies:
+     <br>
+#### ___Google Analytics key___
+1. Go to https://analytics.google.com/analytics/web/ and click on the "Get Started for Free" button.
+2. Sign in with your Google account.
+3. Follow the instructions to create a new account.
+4. Once you have created your account, you will be redirected to the dashboard. Click on the "Admin" button in the top left corner.
+5. Click on the "Create Property" button.
+6. Select "Web" as the property type and click on the "Continue" button.
+7. Enter a name for your property and click on the "Create" button.
+8. Click on the "Tracking Info" button.
+9. Click on the "Tracking Code" button.
+10. Copy the "Tracking ID" and paste it in the GA_KEY field of the .env file.
 
-```
-pip install -r requirements.txt
-```
+
+## How to manage python virtual environment
+- ### Create a virtual environment and install the requirements
+  Open a terminal and navigate to the folder containing the requirements.txt file. \
+  Create a virtual environment by typing: 
+  ```
+  conda create --name my_env_name python=3.10
+  ```
+  Activate the environment by typing:
+  ``` 
+  conda activate my_env_name
+  ```
+  <p>Notice: Replace my_env_name with a relevant name for your environment.
+  <p>You have successfully activated your virtual environment. To install the Python libraries required for your project, run the following command while inside the virtual environment: 
+  
+  ``` 
+  pip install -r requirements.txt
+  ``` 
+- ### How to run the servers
+  Open a terminal and navigate to the folder containing the manage.py file. It should be the same as requirements.txt\
+  Type:
+  ```
+  python manage.py runserver
+  ```
+  Open another terminal and navigate to the folder containing the bring_to_life.py file. It should be the same as requirements.txt\
+  Type:
+  ```
+  python bring_to_life.py
+  ```
+- ### Open the home page
+  Now open a browser and go to the address:  
+  ```
+  localhost:8000
+  ```
 
 
-### Docker
+## Docker
 
-#### build the Dockerfile:
+### Build the Dockerfile:
 
 1. In a terminal goto the root of the repository
-2. Run 
+2. Run this line of code:
 ```
 docker build -t oldphoto
 ```
 3. This will take a while. Wait till the build is finished
 4. If the build stops with an error, try to run ```docker build --no-cache -t oldphoto```. instead
 
-#### run the Docker container:
+### Run the Docker container:
 1. In a terminal goto the root of the repository
 2. Run 
 ```
@@ -89,25 +153,25 @@ http://localhost:8000/`
 
 ## How it works
 
-### 1) LANDING PAGE
+### LANDING PAGE
 Click or '**Start to restore**' button to start the demo
 
-### 2) INPUT PAGE
-- Click on **BROWSE button** to select the images to upload. You can upload multiple images at the same time. After uploading, you can click on the image to see the original image and the restored image. 
+### INPUT PAGE
+- Click on **BROWSE** button to select the images to upload. You can upload multiple images at the same time. After uploading, you can click on the image to see the original image and the restored image. 
 - Select the image or images you want to restore and click Open.
 - The selected images will be shown in the browser with 2 checkbox buttons. 
   - If a photo has scratches or damage that needs to be repaired, select the '**with scratches**' checkbox. 
   - And if the image with scratches has a DPI (dots per inch) of 300 or higher, select the checkbox labeled '**is HD**'.
-- If you need, you can select again on  **BROWSE button** to upload more images from the same folder.
-- When you are ok with the selection, click on the '**PROCESS**' button to start the restoration process.<br>
+- If you need, you can select again on  **BROWSE** button to upload more images from the same folder.
+- When you are ok with the selection, click on the **PROCESS** button to start the restoration process.<br>
 
 Note: The processing time depends on the number of images you upload. The more images you upload, the longer it will take to process.
 
-### 3) OUTPUT PAGE
+### OUTPUT PAGE
 - The restored images will be shown in the browser.
 - For every image, will be shown the original image, the restored image, and, between them, a comparison on the areas most affected by the process.
 - Clicking on **DOWNLOAD** button the browser will download the restored images and bring you back to the landing page.
-- Clicking on **RESTART** button will bring you back to the landing. ATTENTION YOU will loose all your processed images
+- Clicking on **RESTART** button will bring you back to the landing. **ATTENTION**- You will loose all your processed images!!!
 
 
 

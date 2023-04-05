@@ -195,7 +195,7 @@ $(document).ready(function () {
                     index = (index + 1) % messages.length;
                 }, 5000);
 
-                fetch(`${protocol}://${host}:5000/upload-image`, {
+        fetch(`${protocol}://${host}:5000/upload-image`, {
                     method: 'POST',
                     headers: {
                         'X-User-Id': user_id,
@@ -272,7 +272,7 @@ $(document).ready(function () {
 
     });
     window.addEventListener('beforeunload', function (event) {
-        // event.preventDefault(); // prevent default behavior of the event
+        //delete temp folder
         fetch(`${protocol}://${host}:5000/delete-temp-folder/` + user_id, {
                             method: 'DELETE',
                             keepalive: true,
@@ -283,32 +283,10 @@ $(document).ready(function () {
                         .catch(error => {
                             console.error(error);
                         });
-        // console
-        // var xhr = new XMLHttpRequest();
-        // console.log('sending request')
-        // xhr.open('DELETE', `${protocol}://${host}:5000/delete-temp-folder/` + user_id, true); // set async to true
-        // xhr.send();
-        // xhr.onreadystatechange = function() {
-        //     if (xhr.readyState === XMLHttpRequest.DONE) {
-        //         if (xhr.status === 200) {
-        //             console.log('Request sent successfully');
-        //         } else {
-        //             console.error('Error sending request');
-        //         }
-        //     }
-        // }
+
     });
 
 });
-
-function FileListItems(files) {
-    let b = new ClipboardEvent("").clipboardData || new DataTransfer()
-    for (let i = 0; i < files.length; i++) {
-        b.items.add(files[i])
-    }
-    return b.files
-}
-
 
 function downloadImage(url, filename) {
     const link = document.createElement('a');
@@ -440,16 +418,4 @@ const imageDimensions = file =>
         img.src = file
     })
 
-// here's how to use the helper
-const getInfo = async ({target: {files}}) => {
-    console.log(files)
-    const [file] = files
-
-    try {
-        const dimensions = await imageDimensions(file)
-        console.info(dimensions)
-    } catch (error) {
-        console.error(error)
-    }
-}
 
