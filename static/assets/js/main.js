@@ -8,6 +8,7 @@ $(document).ready(function () {
     const port = window.port;
     const host = window.host;
     const protocol = window.protocol;
+    console.log('protocol: ', protocol, 'host: ', host, 'port: ', port, 'user_id: ', user_id)
     const landing_section = "<div id='landing'>\n" +
         "            <h1>Welcome to ReInHerit's Old Photos' Restorer!</h1> <p>Our virtual toolkit has been designed to assist museum owners and enthusiasts in effortlessly restoring old photos. " +
         "       <p>By simply uploading your photo, whether it has scratches or not, our advanced processing algorithms will work their magic. Once the image processing is complete, you will have a fully restored photo to cherish and share with future generations.<br>" +

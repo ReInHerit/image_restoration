@@ -122,7 +122,7 @@ Edit the .env_template file with your own settings and rename it to .env.
 - ### Open the home page
   Now open a browser and go to the address:  
   ```
-  localhost:8000
+  http://localhost:8000
   ```
 
 
@@ -136,18 +136,18 @@ Edit the .env_template file with your own settings and rename it to .env.
 docker build -t oldphoto
 ```
 3. This will take a while. Wait till the build is finished
-4. If the build stops with an error, try to run ```docker build --no-cache -t oldphoto```. instead
+4. If the build stops with an error, try to run it again.
 
 ### Run the Docker container:
 1. In a terminal goto the root of the repository
 2. Run 
 ```
-docker run --env-file=.env -p 8000:8000 -p 5000:5000 oldphoto
+docker run --env-file=.env -e HOST=localhost -p 8000:8000 -p 5000:5000 oldphoto
 ```
 3. Wait till the container is running
 4. Open a browser and go to 
 ```
-http://localhost:8000/`
+http://localhost:8000
 ```
 5. You should see the demo page
 

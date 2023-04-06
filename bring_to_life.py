@@ -9,10 +9,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 from PIL import Image
 import torch
-from django.conf import settings
-
-# protocol = os.getenv('PROTOCOL', settings.PROTOCOL)
-# host = os.getenv('HOST', settings.HOST)
 
 print(f"Is CUDA supported by this system? {torch.cuda.is_available()}")
 print(f"CUDA version: {torch.version.cuda}")
@@ -65,6 +61,10 @@ def upload_image():
     differences(input_scratched)
     differences(input_hd)
     return jsonify({'images': processed_images})
+
+@app.route('/write', methods=['GET'])
+def write():
+    return jsonify({'message': 'Hello World!'})
 
 @app.route('/delete-temp-folder/<user>', methods=['DELETE'])
 def delete_temp_folder(user):

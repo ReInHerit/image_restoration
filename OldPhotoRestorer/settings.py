@@ -33,7 +33,7 @@ SECRET_KEY = django_key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [HOST]
+ALLOWED_HOSTS = [HOST, 'localhost']
 
 
 # Application definition
