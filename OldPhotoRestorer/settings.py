@@ -27,6 +27,8 @@ PROTOCOL = os.environ.get('PROTOCOL', 'http')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = django_key
 
@@ -142,4 +144,3 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 BASE_URL = f"{PROTOCOL}://{HOST}:{PORT}"
-print(BASE_DIR, BASE_URL)
