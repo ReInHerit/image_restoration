@@ -14,13 +14,13 @@ COPY requirements.txt requirements.txt
 RUN pip3 install python-dotenv
 
 RUN pip3 install -r requirements.txt
-
+COPY start.sh .
 COPY . .
 ENV HOST 0.0.0.0
 ENV PORT=${PORT:-8000}
 EXPOSE ${PORT}
 EXPOSE 5000
 
-CMD ["./start.sh"]
+CMD ./start.sh
 
 

@@ -255,6 +255,7 @@ $(document).ready(function () {
                         //delete temp folder
                         fetch(`${protocol}://${host}:5000/delete-temp-folder/` + user_id, {
                             method: 'DELETE',
+                            headers: {'Access-Control-Allow-Origin': '*'},
                         })
                         .then(response => {
                             location.reload();
