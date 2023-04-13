@@ -199,7 +199,7 @@ $(document).ready(function () {
         fetch(`${protocol}://${host}:5000/upload-image`, {
                     method: 'POST',
                     headers: {
-                        'X-User-Id': user_id,
+                        'X-User-Id': user_id, 'Access-Control-Allow-Origin': '*'
                     },
                     body: formData
                 }).then(response => {
@@ -277,6 +277,7 @@ $(document).ready(function () {
         //delete temp folder
         fetch(`${protocol}://${host}:5000/delete-temp-folder/` + user_id, {
                             method: 'DELETE',
+                            headers: {'Access-Control-Allow-Origin': '*'},
                             keepalive: true,
                         })
                         .then(response => {
@@ -311,6 +312,7 @@ async function downloadAllImages(user, protocol, host) {
     }
     await fetch(`${protocol}://${host}:5000/delete-temp-folder/` + user, {
         method: 'DELETE',
+        headers: {'Access-Control-Allow-Origin': '*'},
     })
         .then(response => {
             console.log(response);
