@@ -128,7 +128,7 @@ def affine2theta(affine, input_w, input_h, target_w, target_h):
 
 
 if __name__ == "__main__":
-
+    print("detecting faces...")
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", type=str, default="/home/jingliao/ziyuwan/celebrities", help="input")
     parser.add_argument(
@@ -150,6 +150,7 @@ if __name__ == "__main__":
     count = 0
 
     map_id = {}
+    print("Start to detect face in directory %s" % (url))
     for x in os.listdir(url):
         img_url = os.path.join(url, x)
         pil_img = Image.open(img_url).convert("RGB")

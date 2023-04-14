@@ -216,13 +216,13 @@ def blur_blending(im1, im2, mask):
 
 def blur_blending_cv2(im1, im2, mask):
 
-    mask *= 255.0
+    mask = (mask * 255.0).astype('uint8')
 
     kernel = np.ones((9, 9), np.uint8)
     mask = cv2.erode(mask, kernel, iterations=3)
 
     mask_blur = cv2.GaussianBlur(mask, (25, 25), 0)
-    mask_blur /= 255.0
+    mask_blur = (mask / 255.0).astype('uint8')
 
     im = im1 * mask_blur + (1 - mask_blur) * im2
 
@@ -366,6 +366,7 @@ if __name__ == "__main__":
 
     for x in os.listdir(origin_url):
         img_url = os.path.join(origin_url, x)
+        print("Processing %s" % (x))
         pil_img = Image.open(img_url).convert("RGB")
 
         origin_width, origin_height = pil_img.size
