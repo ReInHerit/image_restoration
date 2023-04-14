@@ -22,7 +22,8 @@ model.eval()
 visualizer = Visualizer(opt)
 
 
-single_save_url = os.path.join(opt.checkpoints_dir, opt.name, opt.results_dir, "each_img")
+#single_save_url = os.path.join(opt.checkpoints_dir, opt.name, opt.results_dir, "each_img")
+single_save_url = os.path.join(opt.results_dir, "each_img")
 
 
 if not os.path.exists(single_save_url):
@@ -30,6 +31,7 @@ if not os.path.exists(single_save_url):
 
 
 for i, data_i in enumerate(dataloader):
+    print("Processing %d" % i)
     if i * opt.batchSize >= opt.how_many:
         break
 
@@ -40,6 +42,7 @@ for i, data_i in enumerate(dataloader):
     for b in range(generated.shape[0]):
         img_name = os.path.split(img_path[b])[-1]
         save_img_url = os.path.join(single_save_url, img_name)
+        print("Processing image %s" % save_img_url)
 
         vutils.save_image((generated[b] + 1) / 2, save_img_url)
 

@@ -55,6 +55,11 @@
         </div>
         <h1 id="title">Old Photos' Restorer</h1>
     </header><!-- End Header -->
+    <form method="post">
+    {% csrf_token %}
+    <!-- other form fields here -->
+    <button type="submit">Submit</button>
+    </form>
     <main id="central">
     </main>
 <!-- ======= Footer ======= -->

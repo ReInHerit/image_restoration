@@ -195,11 +195,11 @@ $(document).ready(function () {
                     loading_text.value = messages[index];
                     index = (index + 1) % messages.length;
                 }, 5000);
-
-        fetch(`${protocol}://${host}:5000/upload-image`, {
+                fetch(`${protocol}://${host}:8000/upload/image/`, {
                     method: 'POST',
                     headers: {
-                        'X-User-Id': user_id, 'Access-Control-Allow-Origin': '*'
+                        'X-User-Id': user_id,
+                        'Access-Control-Allow-Origin': '*'
                     },
                     body: formData
                 }).then(response => {
@@ -253,16 +253,18 @@ $(document).ready(function () {
                     });
                     restart_button.addEventListener("click", function () {
                         //delete temp folder
-                        fetch(`${protocol}://${host}:5000/delete-temp-folder/` + user_id, {
+                        fetch(`${protocol}://${host}:8000/delete/folder/`, {
                             method: 'DELETE',
-                            headers: {'Access-Control-Allow-Origin': '*'},
+                            headers: {
+                                'X-User-Id': user_id,
+                                'Access-Control-Allow-Origin': '*'},
                         })
-                        .then(response => {
-                            location.reload();
-                        })
-                        .catch(error => {
-                            console.error(error);
-                        });
+                            .then(response => {
+                                location.reload();
+                            })
+                            .catch(error => {
+                                console.error(error);
+                            });
                     })
 
                 }).catch(error => {
@@ -275,17 +277,19 @@ $(document).ready(function () {
     });
     window.addEventListener('beforeunload', function (event) {
         //delete temp folder
-        fetch(`${protocol}://${host}:5000/delete-temp-folder/` + user_id, {
-                            method: 'DELETE',
-                            headers: {'Access-Control-Allow-Origin': '*'},
-                            keepalive: true,
-                        })
-                        .then(response => {
-                            location.reload();
-                        })
-                        .catch(error => {
-                            console.error(error);
-                        });
+        fetch(`${protocol}://${host}:8000/delete/folder/`, {
+            method: 'DELETE',
+            headers: {
+                'X-User-Id': user_id,
+                'Access-Control-Allow-Origin': '*'},
+            keepalive: true,
+        })
+            .then(response => {
+                location.reload();
+            })
+            .catch(error => {
+                console.error(error);
+            });
 
     });
 
@@ -310,9 +314,11 @@ async function downloadAllImages(user, protocol, host) {
             downloadPromises.push(downloadImage(url, filename));
         }
     }
-    await fetch(`${protocol}://${host}:5000/delete-temp-folder/` + user, {
+    await fetch(`${protocol}://${host}:8000/delete/folder/`, {
         method: 'DELETE',
-        headers: {'Access-Control-Allow-Origin': '*'},
+        headers: {
+            'X-User-Id': user_id,
+            'Access-Control-Allow-Origin': '*'},
     })
         .then(response => {
             console.log(response);
