@@ -15,10 +15,11 @@ RUN pip3 install python-dotenv
 RUN pip3 install -r requirements.txt
 COPY start.sh .
 COPY . .
-ENV HOST 0.0.0.0
+ENV HOST=${HOST:-0.0.0.0}
 ENV PORT=${PORT:-8000}
 EXPOSE ${PORT}
-EXPOSE 5000
+ENV FLASK_PORT=${FLASK_PORT:-5000}
+EXPOSE ${FLASK_PORT}
 
 CMD ./start.sh
 

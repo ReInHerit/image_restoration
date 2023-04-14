@@ -6,7 +6,7 @@ let hd_images = [];
 $(document).ready(function () {
     const user_id = window.user_id;
     const port = window.port;
-    const host = window.host;
+    const host = 'localhost';  // window.host;
     const protocol = window.protocol;
     console.log('protocol: ', protocol, 'host: ', host, 'port: ', port, 'user_id: ', user_id)
     const landing_section = "<div id='landing'>\n" +
