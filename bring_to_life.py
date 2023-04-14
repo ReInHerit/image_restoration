@@ -5,6 +5,7 @@ import os
 import sys
 import shutil
 from subprocess import call
+import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 from PIL import Image
@@ -12,6 +13,9 @@ import torch
 
 print(f"Is CUDA supported by this system? {torch.cuda.is_available()}")
 print(f"CUDA version: {torch.version.cuda}")
+
+port = int(os.environ.get('FLASK_PORT', 5000))
+print(f'Flask server received port: {port}')
 
 app = Flask(__name__)
 CORS(app)
@@ -34,9 +38,12 @@ def upload_image():
     output_folder = media_folder + '/output_images'
     folders = [media_folder, input_folder, input_scratched, input_hd, output_folder]
     processed_images = []
+    app.logger.info('Resetting folders')
     for folder in folders:
         delete_and_make_folder(folder)
+    app.logger.info('Receiving images...')
     files = request.files.getlist('base')
+    app.logger.info('Received images')
     scratched = request.values.getlist('scratched')
     hd_files = request.values.getlist('hd')
     if not files:
@@ -60,7 +67,12 @@ def upload_image():
     differences(input_folder)
     differences(input_scratched)
     differences(input_hd)
-    return jsonify({'images': processed_images})
+    response = jsonify({'images': processed_images})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 @app.route('/write', methods=['GET'])
 def write():
@@ -251,4 +263,7 @@ def differences(folder):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Configure logging
+    logging.basicConfig(filename='app.log', level=logging.INFO)
+    app.logger.info(f'Starting Flask server on port: {port}')
+    app.run(debug=False, host='0.0.0.0', port=port)
