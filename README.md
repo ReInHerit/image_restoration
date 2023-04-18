@@ -1,5 +1,6 @@
 # Reinherit Toolkits: Old Photos' Restorer
 
+This web app is part of the ReInHerit Toolkit.
 
 **Based on Bringing Old Photos Back to Life, CVPR2020 (Oral)**
 

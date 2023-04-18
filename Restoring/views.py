@@ -1,24 +1,24 @@
-
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import uuid
 from django.conf import settings
 import os.path
-import argparse
 import sys
 from PIL import Image
-import torch
 import shutil
 import numpy as np
 from subprocess import call
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from django.views.decorators.csrf import csrf_exempt
+import logging
+import gc
+
 input_folder = './media/input_images'
 input_scratched = './media/input_scratched_images'
 input_hd = './media/input_hd_images'
 media_folder = './media'
 output_folder = './media/output_images'
-
+logger = logging.getLogger(__name__)
 
 
 def index(response):
@@ -40,6 +40,7 @@ def landing(request):
 @authentication_classes([])
 @permission_classes([])
 def delete_temp_folder(request):
+    logger.debug('The DELETE temp folder has been called.')
     user_id = request.headers.get('X-USER-ID')
     folder_path = f'./media/{user_id}'
     shutil.rmtree(folder_path, ignore_errors=True)
@@ -49,6 +50,7 @@ def delete_temp_folder(request):
 @authentication_classes([])
 @permission_classes([])
 def upload_image(request):
+    logger.debug('The upload image has been called.')
     global input_folder, input_scratched, input_hd, media_folder, output_folder
     user_id = request.headers.get('X-USER-ID')
     media_folder = './media/' + user_id
@@ -99,12 +101,12 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
         except KeyboardInterrupt:
             print("Process interrupted")
             sys.exit(1)
-    gpu = -1
-    if torch.cuda.is_available():
-        cuda_id = torch.cuda.current_device()
-        gpu = cuda_id
-    gpu = str(gpu)
 
+    if os.getenv('GPU'):
+        gpu = os.getenv('GPU')
+    else:
+        gpu = -1
+    gpu = str(gpu)
 
     checkpoint_name = "Setting_9_epoch_100"
 
@@ -115,6 +117,7 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
     main_environment = os.getcwd()
 
     # Stage 1: Overall Quality Improve
+    logger.debug('Running Stage 1.')
     print("Running Stage 1: Overall restoration")
     os.chdir(os.path.join(main_environment, "Global"))
     print("current directory: ", os.getcwd())
@@ -135,7 +138,9 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
         stage_1_command_2 = ("python test.py --Scratch_and_Quality_restore --test_input " + new_input + " --test_mask "
                              + new_mask + " --outputs_dir " + stage_1_output_dir + " --gpu_ids " + gpu)
         run_cmd(stage_1_command_1)
+        gc.collect()
         run_cmd(stage_1_command_2)
+        gc.collect()
     if not len(os.listdir(stage_1_hd_dir)) == 0:
         mask_dir = os.path.join(stage_1_output_dir, "masks_hd")
         new_input = os.path.join(mask_dir, "input")
@@ -145,7 +150,9 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
         stage_1_command_2 = ("python test.py --Scratch_and_Quality_restore --test_input " + new_input + " --test_mask "
                              + new_mask + " --outputs_dir " + stage_1_output_dir + " --gpu_ids " + gpu + " --HR")
         run_cmd(stage_1_command_1)
+        gc.collect()
         run_cmd(stage_1_command_2)
+        gc.collect()
     if not len(os.listdir(stage_1_input_dir)) == 0:
         stage_1_command = (
             "python test.py --test_mode Full --Quality_restore --test_input "
@@ -156,6 +163,7 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
             + gpu
         )
         run_cmd(stage_1_command)
+        gc.collect()
 
     # Solve the case when there is no face in the old photo
     stage_1_results = os.path.join(stage_1_output_dir, "restored_image")
@@ -170,7 +178,7 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
     print("\n")
 
     # Stage 2: Face Detection
-
+    logger.debug('Running Stage 2.')
     print("Running Stage 2: Face Detection")
     os.chdir(".././Face_Detection")
     print("stage 2 current dir: ", os.getcwd())
@@ -182,10 +190,12 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
         os.makedirs(stage_2_output_dir)
     stage_2_command = ("python detect_all_dlib.py --url " + stage_2_input_dir + " --save_url " + stage_2_output_dir)
     run_cmd(stage_2_command)
+    gc.collect()
     print("Finish Stage 2 ...")
     print("\n")
 
     # Stage 3: Face Restore
+    logger.debug('Running Stage 3.')
     print("Running Stage 3: Face Enhancement")
     os.chdir(os.path.join(main_environment, "Face_Enhancement"))
     # os.chdir(".././Face_Enhancement")
@@ -203,10 +213,12 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
         + " --load_size 256 --label_nc 18 --no_instance --preprocess_mode resize --batchSize 4 --results_dir "
         + stage_3_output_dir + " --no_parsing_map")
     run_cmd(stage_3_command)
+    gc.collect()
     print("Finish Stage 3 ...")
     print("\n")
 
     # Stage 4: Warp back
+    logger.debug('Running Stage 4.')
     print("Running Stage 4: Blending")
     os.chdir(os.path.join(main_environment, "Face_Detection"))
     print("stage 4 current dir: ", os.getcwd())
@@ -221,6 +233,7 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
     stage_4_command = ("python align_warp_back_multiple_dlib.py --origin_url " + stage_4_input_image_dir
         + " --replace_url " + stage_4_input_face_dir + " --save_url " + stage_4_output_dir )
     run_cmd(stage_4_command)
+    gc.collect()
     print("Finish Stage 4 ...")
     print("\n")
 
