@@ -171,13 +171,20 @@ $(document).ready(function () {
             /* UPLOAD FILES AND START TO PROCESS THEM */
             document.getElementById('image-form').addEventListener('submit', (event) => {
                 event.preventDefault();
+                const fileNames = [];
                 const formData = new FormData();
                 const files = fileList  // event.target.elements.image.files;
                 console.log('files: ', files)
                 for (let i = 0; i < files.length; i++) {
+                    const fileName = files[i].name;
+
+                    const scratched = scratched_images[i] !== '' ? 'true' : 'false';
+                    const hd = hd_images[i] !== '' ? 'true' : 'false';
+                    fileNames.push({'name':fileName, 'scratched':scratched, 'hd':hd});
                     formData.append('base', files[i]);
-                    formData.append('scratched', scratched_images[i] !== '' ? 'true' : 'false');
-                    formData.append('hd', hd_images[i] !== '' ? 'true' : 'false');
+                    formData.append('scratched', scratched);
+                    formData.append('hd', hd);
+
                 }
                 // select the landing element by ID
                 const input_section = $("#input-section");
@@ -186,7 +193,7 @@ $(document).ready(function () {
                 input_section.replaceWith(loading_div);
 
                 const loading = $("#loader");
-                const messages = ['Loading...', 'Please wait...', 'Almost done...', 'Hang tight...'];
+                const messages = ['Loading...', 'Please wait...', 'Almost done...', 'Hang tight...', 'Wow, how big it is!', 'Oh my goodness!', 'what a tremendous size it has!'];
                 // Get a reference to the loading text field
                 const loading_text = document.getElementById('loading-text');
                 // Start an interval to change the text every 10 seconds
@@ -213,39 +220,124 @@ $(document).ready(function () {
                     // console.log(data)
                     loading.replaceWith(output_section);
                     const output_images = $("#output-images");
-                    for (let i = 0; i < data["images"].length; i++) {
-                        const file_name = data["images"][i].split("\\").pop()
-                        const name = file_name.split(".")[0]
-                        const ext = file_name.split(".")[1]
-                        const input_image = document.createElement("img");
-                        const output_image = document.createElement("img");
-                        const paragon_image = document.createElement("img");
-                        console.log('django media url: ', DJANGO_MEDIA_URL)
-                        output_image.src = DJANGO_MEDIA_URL + user_id + '/' + name + '_output.' + ext;
-                        input_image.src = DJANGO_MEDIA_URL + user_id + '/' + name + '_input.' + ext;
-                        paragon_image.src = DJANGO_MEDIA_URL + user_id + '/' + name + '_paragon.' + ext;
-                        output_image.height = input_image.height = paragon_image.height = 200;
+                    // Create an array to store the file names from data['images']
+                    const dataImageNames = data["images"].map(fileName => {
+                        const file_name = fileName.split("\\").pop();
+                        const name = file_name.split(".")[0];
+                        // const ext = file_name.split(".")[1];
+                        return name;
+                    });
+                    console.log(dataImageNames)
+                    console.log(fileNames)
+                    // Loop through fileNames and check if each file is present in dataImageNames
+                    for (let i = 0; i < fileNames.length; i++) {
+                        const fileName = fileNames[i].name;
+                        const is_scratch = fileNames[i].scratched;
+                        const is_hd = fileNames[i].hd;
+                        const type = is_hd === 'true' ? '_hd_' : is_scratch === 'true' ? '_scratch_' : '_';
+                        console.log('fileName: ', fileName, 'is_scratch: ', is_scratch, 'is_hd: ', is_hd)
+                        const input_extension = fileName.split(".")[1];
+                        console.log('input_extension: ', input_extension)
+                        const ext = 'png';
+                        const name = fileName.split(".")[0];
+                        if (!dataImageNames.includes(name)) {
+                            const folder_name = 'input'+type+'images/'
 
-                        const output_strips = document.createElement("div");
-                        output_strips.classList.add("output_strips");
-                        output_strips.onclick = function () {
-                            let enlarged = $("#enlarged");
-                            enlarged.html("<img src='" + input_image.src + "' class='enlarged-image'>" +
-                                "<img src='" + paragon_image.src + "' class='enlarged-image'>" +
-                                "<img src='" + output_image.src + "' class='enlarged-image'>")
+                            const container = document.createElement("div");
+                            container.classList.add("unavailable_container");
+                            container.style.position = "relative";
+                            container.style.display = "inline-block";
+                            container.style.height = "200px";
+                            container.style.margin = "10px";
 
-                            enlarge_images()
-                            enlarged.removeClass('hidden_tag')
-                            enlarged.click(function () {
-                                enlarged.addClass('hidden_tag')
-                            })
+                            const input_image = document.createElement("img");
+                            input_image.src = DJANGO_MEDIA_URL + user_id + '/' + folder_name + fileName;
+                            input_image.style.filter = "grayscale(100%)";
+                            input_image.style.height = "100%";
+
+                            const textOverlay = document.createElement("div");
+                            textOverlay.innerHTML = "This image is too big, try to upload a smaller version!";
+                            textOverlay.classList.add("unavailable_text");
+                            textOverlay.style.position = "absolute";
+                            textOverlay.style.bottom = "0";
+                            textOverlay.style.left = "0";
+                            textOverlay.style.width = "100%";
+                            textOverlay.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+                            textOverlay.style.color = "white";
+                            textOverlay.style.padding = "10px";
+
+                            container.append(input_image);
+                            container.append(textOverlay);
+                            output_images.append(container);
+                        } else {
+                            // Image is present in data['images'], assign it to output_strips
+                            const output_strips = document.createElement("div");
+                            output_strips.classList.add("output_strips");
+
+                            const input_image = document.createElement("img");
+                            const output_image = document.createElement("img");
+                            const paragon_image = document.createElement("img");
+
+                            // const name = fileName.split(".")[0];
+                            input_image.src = DJANGO_MEDIA_URL + user_id + '/' + name + '_input.' + ext;
+                            output_image.src = DJANGO_MEDIA_URL + user_id + '/' + name + '_output.' + ext;
+                            paragon_image.src = DJANGO_MEDIA_URL + user_id + '/' + name + '_paragon.' + ext;
+
+                            output_image.height = input_image.height = paragon_image.height = 200;
+
+                            output_strips.onclick = function () {
+                                let enlarged = $("#enlarged");
+                                enlarged.html("<img src='" + input_image.src + "' class='enlarged-image'>" +
+                                    "<img src='" + paragon_image.src + "' class='enlarged-image'>" +
+                                    "<img src='" + output_image.src + "' class='enlarged-image'>");
+
+                                enlarge_images();
+                                enlarged.removeClass('hidden_tag');
+                                enlarged.click(function () {
+                                    enlarged.addClass('hidden_tag');
+                                });
+                            };
+
+                            output_strips.append(input_image);
+                            output_strips.append(paragon_image);
+                            output_strips.append(output_image);
+                            output_images.append(output_strips);
                         }
-                        // output_strips.style = "display:flex;flex-wrap:wrap;justify-content:center;margin: 10px;"
-                        output_strips.append(input_image);
-                        output_strips.append(paragon_image);
-                        output_strips.append(output_image);
-                        output_images.append(output_strips);
                     }
+
+                    // for (let i = 0; i < data["images"].length; i++) {
+                    //     const file_name = data["images"][i].split("\\").pop()
+                    //     const name = file_name.split(".")[0]
+                    //     const ext = file_name.split(".")[1]
+                    //     const input_image = document.createElement("img");
+                    //     const output_image = document.createElement("img");
+                    //     const paragon_image = document.createElement("img");
+                    //     // console.log('django media url: ', DJANGO_MEDIA_URL)
+                    //     output_image.src = DJANGO_MEDIA_URL + user_id + '/' + name + '_output.' + ext;
+                    //     input_image.src = DJANGO_MEDIA_URL + user_id + '/' + name + '_input.' + ext;
+                    //     paragon_image.src = DJANGO_MEDIA_URL + user_id + '/' + name + '_paragon.' + ext;
+                    //     output_image.height = input_image.height = paragon_image.height = 200;
+                    //
+                    //     const output_strips = document.createElement("div");
+                    //     output_strips.classList.add("output_strips");
+                    //     output_strips.onclick = function () {
+                    //         let enlarged = $("#enlarged");
+                    //         enlarged.html("<img src='" + input_image.src + "' class='enlarged-image'>" +
+                    //             "<img src='" + paragon_image.src + "' class='enlarged-image'>" +
+                    //             "<img src='" + output_image.src + "' class='enlarged-image'>")
+                    //
+                    //         enlarge_images()
+                    //         enlarged.removeClass('hidden_tag')
+                    //         enlarged.click(function () {
+                    //             enlarged.addClass('hidden_tag')
+                    //         })
+                    //     }
+                    //     // output_strips.style = "display:flex;flex-wrap:wrap;justify-content:center;margin: 10px;"
+                    //     output_strips.append(input_image);
+                    //     output_strips.append(paragon_image);
+                    //     output_strips.append(output_image);
+                    //     output_images.append(output_strips);
+                    // }
                     const download_button = document.getElementById("download_button");
                     const restart_button = document.getElementById("restart_button");
                     download_button.addEventListener("click", function () {
@@ -257,7 +349,8 @@ $(document).ready(function () {
                             method: 'DELETE',
                             headers: {
                                 'X-User-Id': user_id,
-                                'Access-Control-Allow-Origin': '*'},
+                                'Access-Control-Allow-Origin': '*'
+                            },
                         })
                             .then(response => {
                                 location.reload();
@@ -281,7 +374,8 @@ $(document).ready(function () {
             method: 'DELETE',
             headers: {
                 'X-User-Id': user_id,
-                'Access-Control-Allow-Origin': '*'},
+                'Access-Control-Allow-Origin': '*'
+            },
             keepalive: true,
         })
             .then(response => {
@@ -318,7 +412,8 @@ async function downloadAllImages(user, protocol, host) {
         method: 'DELETE',
         headers: {
             'X-User-Id': user_id,
-            'Access-Control-Allow-Origin': '*'},
+            'Access-Control-Allow-Origin': '*'
+        },
     })
         .then(response => {
             console.log(response);

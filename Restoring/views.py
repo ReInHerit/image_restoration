@@ -18,7 +18,7 @@ input_scratched = './media/input_scratched_images'
 input_hd = './media/input_hd_images'
 media_folder = './media'
 output_folder = './media/output_images'
-
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:256, garbage_collection_threshold:0.5"
 
 
 def index(response):
@@ -99,13 +99,25 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
         except KeyboardInterrupt:
             print("Process interrupted")
             sys.exit(1)
+
     gpu = -1
     if torch.cuda.is_available():
-        cuda_id = torch.cuda.current_device()
-        gpu = cuda_id
+        num_gpus = torch.cuda.device_count()
+        print('Number of GPUs available:', num_gpus)
+        for i in range(num_gpus):
+            cuda_properties = torch.cuda.get_device_properties(i)
+            gpu_memory = cuda_properties.total_memory / 1024 ** 3  # Convert bytes to gigabytes
+
+            if gpu_memory > 4:
+                gpu = i
+                print('GPU with more than 4 GB of RAM:', i, torch.cuda.mem_get_info(i))
+                break
+
+    if gpu == -1:
+        print('No suitable GPU found. Setting gpu = -1')
+    else:
+        print('Selected GPU:', gpu)
     gpu = str(gpu)
-
-
     checkpoint_name = "Setting_9_epoch_100"
 
     # resolve relative paths before changing directory
@@ -113,15 +125,15 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     main_environment = os.getcwd()
-
+    media_environment = os.path.join(main_environment, "media")
     # Stage 1: Overall Quality Improve
     print("Running Stage 1: Overall restoration")
     os.chdir(os.path.join(main_environment, "Global"))
     print("current directory: ", os.getcwd())
     print("output folder: ", output_folder)
-    stage_1_input_dir =  os.path.join("..",input_folder)
-    stage_1_scratched_dir =  os.path.join("..",input_scratched)
-    stage_1_hd_dir =  os.path.join("..",input_hd)
+    stage_1_input_dir = os.path.join("..", input_folder)
+    stage_1_scratched_dir = os.path.join("..", input_scratched)
+    stage_1_hd_dir = os.path.join("..", input_hd)
     stage_1_output_dir = os.path.join("..", output_folder, "stage_1_restore_output")
     print("stage 1 output folder: ", stage_1_output_dir)
     if not os.path.exists(stage_1_output_dir):
@@ -159,7 +171,8 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
 
     # Solve the case when there is no face in the old photo
     stage_1_results = os.path.join(stage_1_output_dir, "restored_image")
-    stage_4_output_dir = os.path.join(output_folder, "final_output")
+    stage_4_output_dir = os.path.join("..", output_folder, "final_output")
+    print("current directory: ", os.getcwd())
     if not os.path.exists(stage_4_output_dir):
         os.makedirs(stage_4_output_dir)
     for x in os.listdir(stage_1_results):
@@ -241,11 +254,16 @@ def differences(folder):
     check_files = os.listdir(check_folder)
     for file in os.listdir(folder):
         name, ext = os.path.splitext(file)
+        found = False
         for filename in check_files:
             if os.path.splitext(filename)[0] == name:
                 ext = os.path.splitext(filename)[1]
+                found = True
                 break
 
+        if not found:
+            print(f"Skipping {file} - corresponding file not found in check folder")
+            continue
         input_src = os.path.join(folder, file)
         output_src = os.path.join(output_folder, 'final_output', name + ext)
         input_f = os.path.join(media_folder, name + '_input' + ext)
