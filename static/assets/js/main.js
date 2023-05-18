@@ -6,7 +6,7 @@ let hd_images = [];
 $(document).ready(function () {
     const user_id = window.user_id;
     const port = window.port;
-    const host = 'localhost';  // window.host;
+    const host = window.host;
     const protocol = window.protocol;
     console.log('protocol: ', protocol, 'host: ', host, 'port: ', port, 'user_id: ', user_id)
     const landing_section = "<div id='landing'>\n" +
@@ -202,13 +202,14 @@ $(document).ready(function () {
                     loading_text.value = messages[index];
                     index = (index + 1) % messages.length;
                 }, 5000);
-                fetch(`${protocol}://${host}:8000/upload/image/`, {
+                fetch(`${protocol}://${host}/upload/image/`, {
                     method: 'POST',
                     headers: {
                         'X-User-Id': user_id,
                         'Access-Control-Allow-Origin': '*'
                     },
-                    body: formData
+                    body: formData,
+                    timeout: 65000 // timeout in milliseconds
                 }).then(response => {
                     if (response.ok) {
                         console.log('Image uploaded successfully');
@@ -345,7 +346,7 @@ $(document).ready(function () {
                     });
                     restart_button.addEventListener("click", function () {
                         //delete temp folder
-                        fetch(`${protocol}://${host}:8000/delete/folder/`, {
+                        fetch(`${protocol}://${host}/delete/folder/`, {
                             method: 'DELETE',
                             headers: {
                                 'X-User-Id': user_id,
@@ -370,7 +371,7 @@ $(document).ready(function () {
     });
     window.addEventListener('beforeunload', function (event) {
         //delete temp folder
-        fetch(`${protocol}://${host}:8000/delete/folder/`, {
+        fetch(`${protocol}://${host}/delete/folder/`, {
             method: 'DELETE',
             headers: {
                 'X-User-Id': user_id,
@@ -408,7 +409,7 @@ async function downloadAllImages(user, protocol, host) {
             downloadPromises.push(downloadImage(url, filename));
         }
     }
-    await fetch(`${protocol}://${host}:8000/delete/folder/`, {
+    await fetch(`${protocol}://${host}/delete/folder/`, {
         method: 'DELETE',
         headers: {
             'X-User-Id': user_id,

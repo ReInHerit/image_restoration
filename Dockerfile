@@ -18,6 +18,8 @@ COPY . .
 ENV HOST=${HOST:-0.0.0.0}
 ENV PORT=${PORT:-8000}
 EXPOSE ${PORT}
+# to print Python output to console
+ENV PYTHONUNBUFFERED=1
 
 CMD ./start.sh
 
