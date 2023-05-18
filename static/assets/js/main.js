@@ -202,7 +202,7 @@ $(document).ready(function () {
                     loading_text.value = messages[index];
                     index = (index + 1) % messages.length;
                 }, 5000);
-                fetch(`${protocol}://${host}/upload/image/`, {
+                fetch(`${protocol}://${host}:8000/upload/image/`, {
                     method: 'POST',
                     headers: {
                         'X-User-Id': user_id,
@@ -346,7 +346,7 @@ $(document).ready(function () {
                     });
                     restart_button.addEventListener("click", function () {
                         //delete temp folder
-                        fetch(`${protocol}://${host}/delete/folder/`, {
+                        fetch(`${protocol}://${host}:8000/delete/folder/`, {
                             method: 'DELETE',
                             headers: {
                                 'X-User-Id': user_id,
@@ -371,7 +371,7 @@ $(document).ready(function () {
     });
     window.addEventListener('beforeunload', function (event) {
         //delete temp folder
-        fetch(`${protocol}://${host}/delete/folder/`, {
+        fetch(`${protocol}://${host}:8000/delete/folder/`, {
             method: 'DELETE',
             headers: {
                 'X-User-Id': user_id,
@@ -409,7 +409,7 @@ async function downloadAllImages(user, protocol, host) {
             downloadPromises.push(downloadImage(url, filename));
         }
     }
-    await fetch(`${protocol}://${host}/delete/folder/`, {
+    await fetch(`${protocol}://${host}:8000/delete/folder/`, {
         method: 'DELETE',
         headers: {
             'X-User-Id': user_id,

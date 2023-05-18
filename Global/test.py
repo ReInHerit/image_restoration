@@ -97,6 +97,7 @@ if __name__ == "__main__":
     opt = TestOptions().parse(save=False)
     parameter_set(opt)
 
+
     model = Pix2PixHDModel_Mapping()
 
     model.initialize(opt)

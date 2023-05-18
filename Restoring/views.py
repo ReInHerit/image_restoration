@@ -154,9 +154,9 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
         stage_1_command_2 = ("python test.py --Scratch_and_Quality_restore --test_input " + new_input + " --test_mask "
                              + new_mask + " --outputs_dir " + stage_1_output_dir + " --gpu_ids " + gpu)
         run_cmd(stage_1_command_1)
-        gc.collect()
+        # gc.collect()
         run_cmd(stage_1_command_2)
-        gc.collect()
+        # gc.collect()
     if not len(os.listdir(stage_1_hd_dir)) == 0:
         mask_dir = os.path.join(stage_1_output_dir, "masks_hd")
         new_input = os.path.join(mask_dir, "input")
@@ -166,9 +166,9 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
         stage_1_command_2 = ("python test.py --Scratch_and_Quality_restore --test_input " + new_input + " --test_mask "
                              + new_mask + " --outputs_dir " + stage_1_output_dir + " --gpu_ids " + gpu + " --HR")
         run_cmd(stage_1_command_1)
-        gc.collect()
+        # gc.collect()
         run_cmd(stage_1_command_2)
-        gc.collect()
+        # gc.collect()
     if not len(os.listdir(stage_1_input_dir)) == 0:
         stage_1_command = (
             "python test.py --test_mode Full --Quality_restore --test_input "
@@ -179,7 +179,7 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
             + gpu
         )
         run_cmd(stage_1_command)
-        gc.collect()
+        # gc.collect()
 
     # Solve the case when there is no face in the old photo
     stage_1_results = os.path.join(stage_1_output_dir, "restored_image")
@@ -207,7 +207,7 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
         os.makedirs(stage_2_output_dir)
     stage_2_command = ("python detect_all_dlib.py --url " + stage_2_input_dir + " --save_url " + stage_2_output_dir)
     run_cmd(stage_2_command)
-    gc.collect()
+    # gc.collect()
     print("Finish Stage 2 ...")
     print("\n")
 
@@ -230,7 +230,7 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
         + " --load_size 256 --label_nc 18 --no_instance --preprocess_mode resize --batchSize 4 --results_dir "
         + stage_3_output_dir + " --no_parsing_map")
     run_cmd(stage_3_command)
-    gc.collect()
+    # gc.collect()
     print("Finish Stage 3 ...")
     print("\n")
 
@@ -250,7 +250,7 @@ def modify(image_filename=None, cv2_frame=None, scratched=None):
     stage_4_command = ("python align_warp_back_multiple_dlib.py --origin_url " + stage_4_input_image_dir
         + " --replace_url " + stage_4_input_face_dir + " --save_url " + stage_4_output_dir )
     run_cmd(stage_4_command)
-    gc.collect()
+    # gc.collect()
     print("Finish Stage 4 ...")
     print("\n")
 

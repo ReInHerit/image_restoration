@@ -35,7 +35,7 @@ SECRET_KEY = django_key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [HOST, 'localhost']
+ALLOWED_HOSTS = [HOST, 'localhost', '127.0.0.1']
 
 LOGGING = {
     'version': 1,
