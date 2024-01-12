@@ -10,8 +10,8 @@
     <meta content="" name="keywords">
 
     <!-- Favicons -->
-<!--    <link href="{'assets/img/favicon.png' %}" rel="icon">-->
-<!--    <link href="{'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">-->
+    <!--    <link href="{'assets/img/favicon.png' %}" rel="icon">-->
+    <!--    <link href="{'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">-->
     <script type="text/javascript">
         DJANGO_STATIC_URL = '{{ STATIC_URL }}';
         DJANGO_MEDIA_URL = '{{ MEDIA_URL }}';
@@ -27,8 +27,9 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Satisfy"
           rel="stylesheet">
 
-        <!-- Vendor CSS Files -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Vendor CSS Files -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <!-- Template Main CSS File -->
     <link href="{% static 'assets/css/opr_style.css' %}" rel="stylesheet">
@@ -37,45 +38,57 @@
     <script src="{% static 'assets/js/main.js' %}"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ GA_MEASUREMENT_ID }}"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+        window.dataLayer = window.dataLayer || [];
 
-      gtag('config', '{{ GA_MEASUREMENT_ID }}');
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', '{{ GA_MEASUREMENT_ID }}');
     </script>
 </head>
 <body>
-    <header id="header" class="fixed-top  d-flex align-items-center header-transparent"> <!-- justify-content-center -->
-        <div id="left_header">
-            <img id="header_logo" href="" alt="reinherit logo" src="https://www.reinherit.eu/wp-content/uploads/2022/07/reinherit-logo-square-300x300.jpg">
-            <div id="header_title">
-                <div id="title>"><em>Re</em><strong>InHerit</strong></div>
-                <div id="undertitle">Redefining the Future of Cultural Heritage</div>
-            </div>
+<header id="header" class="fixed-top  d-flex align-items-center header-transparent"> <!-- justify-content-center -->
+    <div id="left_header">
+        <a href="https://reinherit-hub.eu/applications" target="_blank" title="ReInHerit Digital Hub">
+            <img id="header_logo" alt="reinherit logo"
+                 src="https://www.reinherit.eu/wp-content/uploads/2022/07/reinherit-logo-square-300x300.jpg">
+        </a>
+        <div id="header_title">
+            <div id="title>"><em>Re</em><strong>InHerit</strong></div>
+            <div id="undertitle">Redefining the Future of Cultural Heritage</div>
         </div>
-        <h1 id="title">Old Photos' Restorer</h1>
-    </header><!-- End Header -->
-    <form method="post">
+    </div>
+    <h1 id="title">Old Photos' Restorer</h1>
+</header><!-- End Header -->
+<form method="post">
     {% csrf_token %}
     <!-- other form fields here -->
     <button type="submit">Submit</button>
-    </form>
-    <main id="central">
-    </main>
+</form>
+<main id="central">
+</main>
 <!-- ======= Footer ======= -->
-    <footer id="footer">
-        <div class="footer_container">
-            <h3><em>Re</em><strong>InHerit</strong> Toolkit - Old Photos' Restorer </h3>
+<footer id="footer">
+    <div class="footer_container">
+        <h3><em>Re</em><strong>InHerit</strong> Toolkit - Old Photos' Restorer </h3>
 
-            <div class="social-links">
-                <a href="https://twitter.com/reinherit_" target="_blank" title="twitter" class="twitter"><i class="bx bxl-twitter"></i></a>
-                <a href="https://www.facebook.com/ReInHerit/" target="_blank" title="facebook" class="facebook"><i class="bx bxl-facebook"></i></a>
-                <a href="https://www.instagram.com/reinherit_/" target="_blank" title="instagram" class="instagram"><i class="bx bxl-instagram"></i></a>
-                <a href="https://www.linkedin.com/company/reinherit-h2020" target="_blank" title="linkedin" class="linkedin"><i class="bx bxl-linkedin"></i></a>
-                <a href="https://www.youtube.com/channel/UCWg6SySC2I-RQ41qjxZmTmA" target="_blank" title="youtube" class="youtube"><i class="bx bxl-youtube"></i></a>
-            </div>
+        <div class="social-links">
+            <a href="https://twitter.com/reinherit_" target="_blank" title="twitter" class="twitter"><i
+                    class="bx bxl-twitter"></i></a>
+            <a href="https://www.facebook.com/ReInHerit/" target="_blank" title="facebook" class="facebook"><i
+                    class="bx bxl-facebook"></i></a>
+            <a href="https://www.instagram.com/reinherit_/" target="_blank" title="instagram" class="instagram"><i
+                    class="bx bxl-instagram"></i></a>
+            <a href="https://www.linkedin.com/company/reinherit-h2020" target="_blank" title="linkedin"
+               class="linkedin"><i class="bx bxl-linkedin"></i></a>
+            <a href="https://www.youtube.com/channel/UCWg6SySC2I-RQ41qjxZmTmA" target="_blank" title="youtube"
+               class="youtube"><i class="bx bxl-youtube"></i></a>
         </div>
-    </footer>
+    </div>
+</footer>
 <!-- End Footer -->
 </body>
 </html>

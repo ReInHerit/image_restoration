@@ -8,6 +8,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install git bzip2 wget unzi
 
 # Create a working directory
 WORKDIR /app
+RUN pip3 install --upgrade pip
 # Install Python packages
 COPY requirements.txt requirements.txt
 RUN pip3 install python-dotenv

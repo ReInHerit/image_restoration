@@ -134,7 +134,7 @@ Edit the .env_template file with your own settings and rename it to .env.
 1. In a terminal goto the root of the repository
 2. Run this line of code:
 ```
-docker build -t oldphoto
+docker build -t oldphoto .
 ```
 3. This will take a while. Wait till the build is finished
 4. If the build stops with an error, try to run it again.
