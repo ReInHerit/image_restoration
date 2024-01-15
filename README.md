@@ -178,7 +178,6 @@ Note: The processing time depends on the number of images you upload. The more i
 
 ## Citation
 
-If you find our work useful for your research, please consider citing the following papers :)
 
 ```bibtex
 @inproceedings{wan2020bringing,
